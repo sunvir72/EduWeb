@@ -1,0 +1,26 @@
+{% extends 'basepage.html' %}
+{% block content %}
+<div style="background-color:#DEEEFF;color:#474747"><br><h2><center>Machine Learning portal</center></h2><hr></div><br>
+<div class="container"><br>
+{% csrf_token %}
+
+<table bgcolor="white" class="table table-bordered">
+			<tr id="del{{i.7}}">
+				{% for value in data_list %} 
+                	<th><center>{{ value }}</center></th>
+            	{% endfor %}
+        	</tr>
+        	{% for index,row in data_list.iterrows %}
+			<tr id="del{{i.7}}">
+				{% for value in row %} 
+                    	{% if row.prediction == 1 %}
+                        	<td bgcolor="#ff9999" ><center>{{ value }}</center></td> 
+                    	{% else %}
+                    		<td bgcolor="#9FE2BF" ><center>{{ value }}</center></td> 
+                    	{% endif %}
+                    {% endfor %} 
+			</tr>
+			{% endfor %}
+</table>
+</div>
+{% endblock %}

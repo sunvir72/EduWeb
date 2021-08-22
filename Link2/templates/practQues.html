@@ -1,0 +1,231 @@
+{% extends 'basepage.html' %}
+{% block content %}
+<!-- jinne ques ne one forms bana kyonke har ques li backend te jana with different arguments(things.id). Nale $("form"+curr) nhi kr sakde kyonke ikko var hi declare hou function ta. So jinni mrji var curr change krla ene ta form0 hi rehna. This is why we used onsubmit(javascript)  -->
+
+<div style="padding-top:24px;background-color:white"><h2><center><b>{{topic}}</b> practice questions <a href='/courses' class="btn btn-warning btn-sm">Exit</a> </center></h2><hr></div><br>
+<div class="container">
+<h4></h4>
+<div id="quesEnd">
+</div>
+
+<form id="formID" onsubmit="event.preventDefault(); subform();" method="POST" action="{% url 'evaluatePQ' currques.id cid %}" >
+{% csrf_token %}
+<h6 id="fbID" style="padding:7px;border:1px solid #e1e1e1;border-radius:5px;background-color:white;display:none"></h6>
+<table id="tableID" style="white-space: normal;" class="table table-transparent" >
+<tr style="background-color:white;box-shadow: 0 0 12px #e6e6e6;" ><td id="rowID">
+<h4>{{currques.ques|linebreaksbr}}</h4>
+{% if currques.img %}<br>
+	<img src="{{currques.img.url}}" style="max-width:400px;max-height:400px"><br><br>
+	{% endif %}
+<h5>
+{% if currques.isradio %}
+
+<input type="radio" name="options" value="a" required>  a) {{currques.opt1}}</input><br>
+<input type="radio" name="options" value="b" required>  b) {{currques.opt2}}</input><br>
+{% if currques.opt3 %}<input type="radio" name="options" value="c" required>  c) {{currques.opt3}}</input><br>{% endif %}
+{% if currques.opt4 %}<input type="radio" name="options" value="d" required>  d) {{currques.opt4}}</input><br>{% endif %}
+{% if currques.opt5 %}<input type="radio" name="options" value="e" required>  e) {{currques.opt5}}</input><br>{% endif %}
+{% if currques.opt6 %}<input type="radio" name="options" value="f" required>  f) {{currques.opt6}}</input><br>{% endif %}
+{% else %}
+<input type="checkbox" name="options[]" id="checkboxID" value="a">  a) {{currques.opt1}}</input><br>
+<input type="checkbox" name="options[]" id="checkboxID" value="b">  b) {{currques.opt2}}</input><br>
+{% if currques.opt3 %}<input type="checkbox" name="options[]" id="checkboxID" value="c">  c) {{currques.opt3}}</input><br>{% endif %}
+{% if currques.opt4 %}<input type="checkbox" name="options[]" id="checkboxID" value="d">  d) {{currques.opt4}}</input><br>{% endif %}
+{% if currques.opt5 %}<input type="checkbox" name="options[]" id="checkboxID" value="e">  e) {{currques.opt5}}</input><br>{% endif %}
+{% if currques.opt6 %}<input type="checkbox" name="options[]" id="checkboxID" value="f">  f) {{currques.opt6}}</input><br>{% endif %}
+{% endif %}
+</h5>
+<input id="tt" type="hidden" name="time">
+</td></tr>
+</table>
+<center><button id="tryagain" type="button" onclick="tryagainFunc()" style="display:none" class="btn btn-outline-primary">Try again</button><button id="subtn" class="btn btn-primary" type="submit" >Submit</button><button id="next" class="btn btn-primary" style="width:80px;margin-left: 20px" type="button" onclick="nextfunc()" disabled>Next</button></center>
+</form>
+
+</div>
+<script>
+	var prevTime;
+	var stopwatchInterval, elapsedTime = 0;
+
+	function start(){
+	 prevTime=Date.now();
+	     stopwatchInterval = setInterval(function () {
+	      
+	     elapsedTime = Date.now() - prevTime;      
+	     updateTime();
+	    }, 100);
+	}
+
+	function reset(){
+	  clearInterval(stopwatchInterval);
+	}
+
+	/*function show(){
+		var seconds1 = Math.floor(elapsedTime / 1000);
+		alert(seconds1);
+	}*/
+</script>
+<script>
+	$(document).ready(function() {
+	  // executes when HTML-Document is loaded and DOM is ready
+	  start();
+	});
+</script>
+<script>
+	var curr_attempts=0;
+	var quesIndex=0;
+	var quesIDs={{all_q|safe}};
+	var cid={{cid}};
+	var isradio={{currques.isradio}};
+	/*var formlen = document.forms.length;
+	document.getElementById("form0").style.display="block";//pehla question ta dikhuga hi
+	var curr=0;//pehla ques is current visible ques*/
+
+</script>
+<script>
+	function nextfunc(){
+		//alert('in');
+		//return false;
+		if(quesIndex == quesIDs.length){
+			document.getElementById("formID").style.display="none";
+			document.getElementById("subtn").remove();
+			document.getElementById("next").remove();
+			document.getElementById("quesEnd").innerHTML="<center><h5>That's all the questions in this topic!</h5><br><a class='btn btn-primary' href='/courses'>Home</a></center>";
+			return false;
+		}
+		/*document.getElementById("formID").style.display="none";
+		$("#form"+(curr+1)).fadeIn();
+		curr=curr+1;*/
+		document.getElementById("rowID").style.backgroundColor="white";
+		document.getElementById("rowID").innerHTML='<center><div class="spinner-grow text-primary" style="vertical-align:middle;" role="status"></div>Fetching Question</center>';
+
+		document.getElementById("next").disabled = true;
+		document.getElementById("subtn").disabled = true;
+		document.getElementById("fbID").style.display = "none";
+		$.ajax({
+		url:'/courses/getNextPQ/'+quesIDs[quesIndex],//CHECK if first '/' required
+		//data:serializedData,
+		type:'get',
+		success: function(response){
+			document.getElementById("formID").action='/courses/evaluatePQ/'+response.qid+'/'+cid; // '/courses/evaluatePQ/'+quesIDs[quesIndex]+'/'+cid;
+			document.getElementById("tableID").innerHTML='<tr style="background-color:white;box-shadow: 0 0 12px #e6e6e6;" ><td id="rowID"></td><tr>';
+			document.getElementById("rowID").innerHTML='<h4>'+response.ques+'</h4>';
+			if(response.imgurl){
+				$("#rowID").append('<img src="'+response.imgurl+'" style="max-width:400px;max-height:400px"><br><br>');
+			}
+			
+			if(response.isradio){
+				$("#rowID").append('<h5 id="opts"><input type="radio" name="options" value="a" required>  a) '+response.opt1+'</input><br><input type="radio" name="options" value="b" required>  b) '+response.opt2+'</input><br></h5>');
+				if(response.opt3){
+					$("#opts").append('<input type="radio" name="options" value="c" required>  c) '+response.opt3+'</input><br>');}
+				if(response.opt4){
+					$("#opts").append('<input type="radio" name="options" value="d" required>  d) '+response.opt4+'</input><br>');}
+				if(response.opt5){
+					$("#opts").append('<input type="radio" name="options" value="e" required>  e) '+response.opt5+'</input><br>');}
+				if(response.opt6){
+					$("#opts").append('<input type="radio" name="options" value="f" required>  f) '+response.opt6+'</input><br>');}
+			}
+			else{
+				$("#rowID").append('<h5 id="opts"><input type="checkbox" name="options[]" id="checkboxID" value="a">  a) '+response.opt1+' </input><br> <input type="checkbox" name="options[]" id="checkboxID" value="b">  b) '+response.opt2+'</input><br></h5>');
+				
+				if(response.opt3){
+					$("#opts").append('<input type="checkbox" name="options[]" id="checkboxID" value="c">  c) '+response.opt3+'</input><br>');}
+				if(response.opt4){
+					$("#opts").append('<input type="checkbox" name="options[]" id="checkboxID" value="d">  d) '+response.opt4+'</input><br>');}
+				if(response.opt5){
+					$("#opts").append('<input type="checkbox" name="options[]" id="checkboxID" value="e">  e) '+response.opt5+'</input><br>');}
+				if(response.opt6){
+					$("#opts").append('<input type="checkbox" name="options[]" id="checkboxID" value="f">  f) '+response.opt6+'</input><br>');}
+			}
+			$("#opts").append('<input id="tt" type="hidden" name="time">');
+			quesIndex=quesIndex+1;
+			isradio=response.isradio;
+			document.getElementById("next").disabled = true;
+			document.getElementById("subtn").disabled = false;
+
+			document.getElementById("tryagain").style.display = "none";
+			document.getElementById("subtn").style.display = "inline";
+
+			curr_attempts=0;
+			start();/******/
+		},
+		error: function (textStatus, errorThrown) {
+		    document.getElementById("next").disabled = false;
+			document.getElementById("subtn").disabled = true;
+			document.getElementById("rowID").innerHTML='';
+			alert('Error! Please make sure you are connected to the internet');
+		}
+		})
+
+	}
+</script>
+<script>
+	function tryagainFunc(){
+		if(curr_attempts>1){
+			alert('You have exceeded the number of attempts allowed for this question!');
+			return false;
+		}
+		document.getElementById("rowID").style.backgroundColor="white";
+		if(isradio){
+			var ele = document.getElementsByName("options");
+		}
+		else{
+			var ele = document.getElementsByName("options[]");
+		}
+		   for(var i=0;i<ele.length;i++){
+		      ele[i].checked = false;
+		   }
+
+		document.getElementById("tryagain").style.display = "none";
+		document.getElementById("subtn").style.display = "inline";
+		document.getElementById("subtn").disabled = false;
+		document.getElementById("next").disabled = true;
+		curr_attempts=curr_attempts+1;
+		start();/******/
+	}
+</script>
+<script>
+function subform(){
+if(document.getElementById("formID").elements[1].type=="checkbox"){
+	var ch = $('input:checkbox[id="checkboxID"]:checked').length;
+	if(ch==0){
+		alert('Select atleast one option');
+		return false;
+	}
+}
+reset();/******/
+var seconds1 = Math.floor(elapsedTime / 1000);
+document.getElementById("tt").value=seconds1;
+var serializedData=$("#formID").serialize();
+$.ajax({
+url:$("#formID").attr('action'),//URL WILL BE EDITED AS:  /elapsedTime
+data:serializedData,
+type:'post',
+success: function(response){
+	//THIS CONDITION NO LONGER NEEDED i guess 
+	if(response.exists==1){
+		window.location.href = "/courses/quesRO/"+response.cid+"";
+	}
+	if(response.result==1){
+		document.getElementById("rowID").style.backgroundColor="#C2FDCC";
+	}
+	else if(response.result==2){
+		document.getElementById("rowID").style.backgroundColor="#FDC2C2";
+		document.getElementById("fbID").style.display = "block";
+		document.getElementById("fbID").innerHTML = response.fb;
+		//alert(response.fb);
+		document.getElementById("subtn").style.display = "none";
+		document.getElementById("tryagain").style.display = "inline";
+
+	} 
+	document.getElementById("next").disabled = false;
+	document.getElementById("subtn").disabled = true;
+	
+},
+error: function (textStatus, errorThrown) {
+      alert('error');
+      document.getElementById("next").disabled = true;
+}
+})
+}
+</script>
+{% endblock %}

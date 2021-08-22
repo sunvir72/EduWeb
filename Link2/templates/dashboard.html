@@ -1,0 +1,489 @@
+{% extends 'basepage_dash.html' %}
+{% block content %}
+<div style="padding-top:24px;background-color:white"><h2><center>My Dashboard</center></h2><hr></div><br>
+
+
+<div class="container">
+	<!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div style="background-color:#333D4B;color:white;border-radius:4px" class="modal-header">
+          <h4 id="header" class="modal-title"></h4>
+          <button type="button" style="color:white" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- Modal body -->
+        <div id="body" class="modal-body">
+          Modal body..
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="resetModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-body">
+        	<center>
+        	<h4>Are you sure?</h4><hr>
+        	<center>Your responses for questions in this topic will be resetted and you will be able to attempt them again</center><br>
+        	<a id="reset" class="btn btn-danger" href="#">Reset</a>
+        	<button type="button" id="noGoBack" class="btn btn-success" data-dismiss="modal">Cancel</button>
+        	</center>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+	<h4>My Courses</h4>
+
+		<select id="sb" class="form-control" onchange="showhide()">
+			{% for course in mycourses %}
+			<option value={{forloop.counter0}}>{{course.item}}</option>
+			{% endfor %}
+		</select>
+		
+	<br>
+{% for course in mycourses %}
+	<div id="course{{forloop.counter0}}" style="display:none" class="dashitem">
+		<div class="headerdash">
+			<h5 style="text-align: center;">
+				<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-file-text-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+				  <path fill-rule="evenodd" d="M12 1H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zM5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zM5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm0 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1H5z"/>
+				</svg>
+			{{course.item}}</h5>
+		</div>
+		<div style="padding: 10px">
+			<h5 style="margin-left: -10px;background-color: #CEE0FF;padding: 5px;width:165px">Test analysis</h5>
+			<div class="row">
+				<div class="col-4">
+					<p class="dashp">Total tests:{{course.testcount}}</p>
+					<center>
+					 <div id="gauge{{forloop.counter0}}" style="width: 200px; height: 200px;"></div>
+					 <p style="color: grey;width: 200px;text-align: center;">Overall Performance in class</p></center>
+				</div>
+				<div class="col" >
+					<p class="dashp">Course Tests</p>
+					
+					<div style="overflow-x: auto;margin-right: 10;padding:0;max-width:700px">
+					<table class="table table-bordered">
+						
+						<tr>
+						{% for id,n,s,q1,q2,q3 in course.myScoreTestWise %}	
+							
+								{% if s == 'NA' %}
+								<td ><center><p data-toggle="tooltip" data-placement="top" title="Topic: ___">{{n}}</p><hr><div id="gauge_tw_{{course.id}}{{forloop.counter0}}" style="height:150px;width:150px"></div>
+									<hr>{{s}}<br><a href="{% url 'quesRO' course.id %}" target="_blank" class="btn btn-outline-primary">Attempt</a></center></td>
+
+								{% else %}
+								<td ><center><p data-toggle="tooltip" data-placement="top" title="Topic: ___">{{n}}</p><hr><div id="gauge_tw_{{course.id}}{{forloop.counter0}}" style="height:150px;width:150px"></div>
+								<hr>Score: {{s}}<br><button id="{{n}},{{id}}" onclick="func(this.id)" data-toggle="modal" data-target="#myModal" class="btn btn-primary">Answer Sheet</button></center></td>
+								
+								{% endif %}
+						{% endfor %}
+						</tr>
+					</table>
+				</div>
+				</div>
+			</div>
+			
+			<hr>
+			<h5 style="margin-left: -10px;background-color: #CEE0FF;padding: 5px;width:165px">Practice analysis</h5>
+
+			<div class="row">
+				<div class="col-4">
+					<p class="dashp">Total questions attempted:{{course.pqa}}</p>
+					<center>
+					 <div id="gauge_{{forloop.counter0}}" style="width: 200px; height: 200px;"></div>
+					 <p style="color: grey;width: 200px;text-align: center;">Success rate of attempted questions</p></center>
+				</div>
+				<div class="col">
+					<p class="dashp">Topic wise performance</p>
+					<div style="overflow-y: auto;max-height: 250;margin-right: 10;padding:0">
+					<table class="table table-bordered">
+						<tr bgcolor="#f7f7f7">
+							<td><b>Topic</b></td>
+							<td><b>Questions<br>attempted</b></td>
+							<td><b>Success rate</b></td>
+							<td><b>Attempt</b></td>
+							<td><b>Recommendations</b></td>
+						</tr>
+						{% for t,tqa,tq,s,tid in course.topics %}
+						<tr>
+							<td>{{t}}</td>
+							<td>{{tqa}}/{{tq}}</td>
+							{% if s >= 75  %}
+							<td style="background-color:#DBFFDD"><span style="font-size: 25px;color:#109618;vertical-align:sub">&#9673;</span>{{s}}%</td>
+							{% elif s <= 25 %}
+							<td style="background-color:#FFDFD7"><span style="font-size: 25px;color:#DC3912;vertical-align:sub">&#9673;</span>{{s}}%</td>
+							{% else %}
+							<td style="background-color:#FFF5E6"><span style="font-size: 25px;color:#FF9900;vertical-align:sub">&#9673;</span>{{s}}%</td>
+							{% endif %}
+
+							{% if tqa == tq %}
+							<td><a class="btn btn-outline-primary" href="{% url 'quesRO' course.id %}">Attempt</a>&nbsp;<button type="button" data-toggle="modal" data-target="#resetModal" class="btn btn-outline-success" onclick="document.getElementById('reset').href=this.id" id="{% url 'resetPractQues' course.id tid %}">Reset</button>
+							{% else %}
+							<td><a class="btn btn-outline-primary" href="{% url 'quesRO' course.id %}">Attempt</a></td>
+							{% endif %}
+
+							{% if tqa == tq %}
+							<td><a href="{% url 'studentResources' course.id tid %}" class="btn btn-outline-primary">Resources</a>&nbsp;&nbsp;<a href="{% url 'studentAssignments' course.id tid %}" class="btn btn-outline-primary">Assignment</a></td>
+							{% else %}
+							<td></td>
+							{% endif %}
+						</tr>
+						{% endfor %}
+					</table>
+				</div>
+				</div>
+			</div>
+		</div>
+		
+
+	</div>
+
+{% endfor %}
+</div>
+<script>
+	var curr=0;
+	document.getElementById("course0").style.display="block";
+</script>
+<script>
+	function showhide(){
+		var sel=document.getElementById("sb").value;
+		document.getElementById("course"+curr).style.display="none";
+		document.getElementById("course"+sel).style.display="block";
+		curr=sel;	
+	}
+</script>
+<script>
+//ya_ is for bigger meter. only difference:tickPixelInterval: 100, Lines were not showing properly with ya 
+	ya_={
+        min: 0,
+        max: 100,
+        minorTickInterval: 12.5,
+        minorTickWidth: 1,
+        minorTickColor: '#666',
+
+        tickPixelInterval: 100,
+        tickWidth: 2,
+        tickColor: 'black',
+        labels: {
+            step: 0,
+        },
+        title: {
+            text: ''
+        },
+        plotBands: [{
+            from: 0,
+            to: 25,
+            color: '#DC3912'
+        }, {
+            from: 25,
+            to: 50,
+            color: '#FF9900' 
+        },{
+            from: 50,
+            to: 75,
+            color: '#6BF11E' 
+        },
+        {
+            from: 75,
+            to: 100,
+            color: '#109618' 
+        }]
+    };
+	ya={
+        min: 0,
+        max: 100,
+        minorTickInterval: 12.5,
+        minorTickWidth: 1,
+        minorTickColor: '#666',
+
+        tickPixelInterval: 75,
+        tickWidth: 2,
+        tickColor: 'black',
+        labels: {
+            step: 0,
+        },
+        title: {
+            text: ''
+        },
+        plotBands: [{
+            from: 0,
+            to: 25,
+            color: '#DC3912'
+        }, {
+            from: 25,
+            to: 50,
+            color: '#FF9900' 
+        },{
+            from: 50,
+            to: 75,
+            color: '#6BF11E' 
+        },
+        {
+            from: 75,
+            to: 100,
+            color: '#109618' 
+        }]
+    };
+    pn={
+        startAngle: -150,
+        endAngle: 150,
+        background: [{
+            backgroundColor: {
+               
+                stops: [
+                    [0, 'white'],
+                ]
+            },
+            borderWidth: 10,
+            outerRadius: '109%'
+        }, {
+            // default background
+        }, ]
+    };
+
+	  
+
+{%  for course in  mycourses %}
+    Highcharts.chart('gauge'+{{forloop.counter0}}, {
+				    chart: {
+				        type: 'gauge',
+				    },
+				    credits: {
+				    enabled: false
+				  },title: {
+				        text: ''
+				    },
+				    pane: pn,
+				    yAxis: ya_,
+				    series: [{
+				        name: '',
+				        data: [{{course.myrange_ov}}],
+				        tooltip: {
+				            valueSuffix: '%'
+				        }
+				    }]
+				},
+				);
+
+////////////////////
+	Highcharts.chart('gauge_'+{{forloop.counter0}}, {
+				    chart: {
+				        type: 'gauge',
+				    },
+				    credits: {
+				    enabled: false
+				  },title: {
+				        text: ''
+				    },
+				    pane: pn,
+				    yAxis: ya_,
+				    series: [{
+				        name: '',
+				        data: [{{course.sr}}],
+				        tooltip: {
+				            valueSuffix: '%'
+				        }
+				    }]
+				},
+				);
+
+
+        	
+
+        	{% for id,n,s,q1,q2,q3 in course.myScoreTestWise %}
+
+					{% if s == 'NA' %}
+						Highcharts.chart('gauge_tw_'+{{course.id}}+{{forloop.counter0}}, {
+						    chart: {
+						        type: 'gauge',
+						    },
+						    credits: {
+						    enabled: false
+						  },title: {
+						        text: ''
+						    },
+						    pane: pn,
+						    yAxis: ya,
+						    series: [{
+						        name: '',
+						        data: [0],
+						        tooltip: {
+						            valueSuffix: '%'
+						        }
+						    }]
+						},
+						);
+					{% elif s <= q1 %}
+						Highcharts.chart('gauge_tw_'+{{course.id}}+{{forloop.counter0}}, {
+						    chart: {
+						        type: 'gauge',
+						    },
+						    credits: {
+						    enabled: false
+						  },title: {
+						        text: ''
+						    },
+						    pane: pn,
+						    yAxis: ya,
+						    series: [{
+						        name: '',
+						        data: [12.5],
+						        tooltip: {
+						            valueSuffix: '%'
+						        }
+						    }]
+						},
+						);
+					{% elif s >= q3 %}
+						Highcharts.chart('gauge_tw_'+{{course.id}}+{{forloop.counter0}}, {
+						    chart: {
+						        type: 'gauge',
+						    },
+						    credits: {
+						    enabled: false
+						  },title: {
+						        text: ''
+						    },
+						    pane: pn,
+						    yAxis: ya,
+						    series: [{
+						        name: '',
+						        data: [87.5],
+						        tooltip: {
+						            valueSuffix: '%'
+						        }
+						    }]
+						},
+						);
+					{% elif s > q2 %}
+						Highcharts.chart('gauge_tw_'+{{course.id}}+{{forloop.counter0}}, {
+						    chart: {
+						        type: 'gauge',
+						    },
+						    credits: {
+						    enabled: false
+						  },title: {
+						        text: ''
+						    },
+						    pane: pn,
+						    yAxis: ya,
+						    series: [{
+						        name: '',
+						        data: [62.5],
+						        tooltip: {
+						            valueSuffix: '%'
+						        }
+						    }]
+						},
+						);
+					{% else %}
+						Highcharts.chart('gauge_tw_'+{{course.id}}+{{forloop.counter0}}, {
+						    chart: {
+						        type: 'gauge',
+						    },
+						    credits: {
+						    enabled: false
+						  },title: {
+						        text: ''
+						    },
+						    pane: pn,
+						    yAxis: ya,
+						    series: [{
+						        name: '',
+						        data: [37.5],
+						        tooltip: {
+						            valueSuffix: '%'
+						        }
+						    }]
+						},
+						);
+					{% endif %}
+
+        		
+        	{% endfor %}
+
+{% endfor %}
+      
+</script>
+
+<script>
+function func(name){
+var res = name.split(",");
+document.getElementById("header").innerHTML=res[0];
+document.getElementById("body").innerHTML = "<center><span class='spinner-border spinner-border-sm' style='width: 3rem; height: 3rem;vertical-align: middle;' role='status' aria-hidden='true'></span>&nbsp;&nbsp; Fetching answer sheet..</center>";
+
+$.ajax({
+url:'/courses/qn_attempts/-1/'+res[1]+'/-1' ,
+type:'get',
+success: function(response){
+
+$("#body").html("<br><table id='ansheet' style='white-space:normal' class='table table-striped table-bordered'></table>");
+
+
+$("#ansheet").html("<tr bgcolor='#f2f2f2'><td></td><td><center><b>Question</b></center></td><td><center><b>Result</b></center></td></tr>")
+for (var i=0; i<response.quesns.length; i++) {
+
+
+
+if(response.imgurl[i]){
+	if(response.ans[i] == 1){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'></td><td style='color:#0CBD00'>+"+ response.posM[i] +"</td></tr>")
+	}
+	else if(response.ans[i] == 2){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'></td><td style='color:red'>-"+ response.negM[i] +"</td></tr>")
+	}
+	else{
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'></td><td style='color:grey'>NA</td></tr>")
+	}
+	///////////////////////////////////////////////////////////
+	if(response.ans[i] == 1){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'></td><td style='color:#0CBD00;background-color:#DBFFDD'>+"+ response.posM[i] +"</td></tr>")
+	}
+	else if(response.ans[i] == 2){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'><br><div style='padding:5px;background-color:#f2f2f2;margin-top:10px;border-radius:5px'>"+response.fb[i]+"</div></td><td style='color:red;background-color:#FFDBDB;border-bottom-color:#d5d5d5'>-"+ response.negM[i] +"</td></tr>")
+	}
+	else{
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'></td><td style='color:grey'>NA</td></tr>")
+	}
+}
+else{
+	if(response.ans[i] == 1){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"</td><td style='color:#0CBD00;background-color:#DBFFDD'>+"+ response.posM[i] +"</td></tr>")
+	}
+	else if(response.ans[i] == 2){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><div style='padding:5px;background-color:#f2f2f2;margin-top:10px;border-radius:5px'>"+response.fb[i]+"</div></td><td style='color:red;background-color:#FFDBDB;border-bottom-color:#d5d5d5'>-"+ response.negM[i] +"</td></tr>")
+	}
+	else{
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"</td><td style='color:grey'>NA</td></tr>")
+	}
+}
+
+
+
+
+}
+},
+error: function (textStatus, errorThrown) {
+alert('Error');
+}
+})
+
+}
+</script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+});
+</script>
+{% endblock %}

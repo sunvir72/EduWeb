@@ -1,0 +1,186 @@
+{% extends 'basecourse.html' %}
+  {% block content %}
+<div style="font-family:verdana;padding-top:24px;background-color:white" >
+  <h3><div class="row" style="margin-right:0">
+    <div class="col-md-auto" style="width:50px">
+      <button class="btn" onclick="openNav()" style="font-size: 25px;background-color:#e7f0ff">&#9776;</button></div>
+    <div class="col"><center>{{course.item}}</center></div>
+</div></h3><hr></div><br>
+
+<div class="container">
+
+<div style="border-radius: 6px;box-shadow: 0 0 10px #D8D8D8;padding: 25px;background-color:white">
+
+<div id="desc">
+<center>
+	<h4 style="display:inline-block;color:green;border: 1px solid green;padding: 7px;width: 200px;border-radius: 5px;"><center>Credits: {{course.cred}}</center></h4></center>
+	<br>
+	<h5><strong>Course Description</strong>:<br><br> {{course.desc|linebreaks}}</h5><br>
+</div>
+
+<div id="syll" style="display:none">
+<h5><strong>Syllabus</strong>:<br><br> {{course.syllabus|linebreaks}}</h5><br>
+</div>
+
+<div id="topics" style="display:none">
+{% if topics %}
+	<h4>Course Topics:</h4>
+<div style="overflow-x: auto;">
+  <table class="table table-transparent">
+  {% for it in topics %}
+  <tr id="topicele" >
+  <td>{{it.name}}</td>
+  </tr>
+  {% endfor %}
+  </table>
+</div>
+{% endif %}
+</div>
+
+<div id="link" style="display:none">	
+	{% if l %}
+	<h4>Reference Links:</h4>
+<div style="overflow-x: auto;">
+  <table class="table table-transparent">
+  <tr bgcolor="#f2f2f2"><td><b>Link</b></td><td><b>Topic</b></td></tr>
+  {% for it in l %}
+  <tr>
+  <td><a id="link,{{it.topic}}" onclick="resClick(this.id)" href="{{it}}" target="_blank">{{it}}</a></td><td>{{it.topic}}</td>
+  </tr>
+  {% endfor %}
+  </table>
+</div>
+  {% endif %}
+</div>
+
+<div id="inst" style="display:none">
+	{% if i %}
+	<h4>Course Instructors:</h4>
+<div style="overflow-x: auto;">
+  <table class="table table-transparent">
+  {% for it in i %}
+  <tr>
+  <td>{{it}}</td>
+  </tr>
+  {% endfor %}
+  </table>
+</div>
+  {% endif %}
+</div>
+
+<div id="ann" style="display:none">
+	{% if ann %}
+	<h4>Announcements:</h4>
+<div style="overflow-x: auto;">
+  <table class="table table-transparent">
+  {% for it in ann %}
+  <tr>
+  <td><b>{{forloop.counter}})</b> {{it|linebreaksbr}}</td>
+  </tr>
+  {% endfor %}
+  </table>
+</div>
+	{% endif %}
+</div>
+
+<div id="ass" style="display:none">
+{% if ass %}
+<h4>Assignments:</h4>
+<div style="overflow-x: auto;">
+  <table class="table table-transparent">
+  <tr bgcolor="#f2f2f2"><td><center><b>Name</b></center></td><td><center><b>Topic</b></center></td><td></td></tr>
+  {% for i in ass %}
+  <tr>
+  <td><center>{{i.name}}</center></td>
+  <td><center>{{i.topic}}</center></td>
+  <td><center><a id="assignment,{{i.topic}}" onclick="resClick(this.id)" href="{{i.assign.url}}" target="_blank">Download</a></center></td>
+  </tr>
+  {% endfor %}
+  </table>
+</div>
+{% endif %}
+</div>
+
+
+</div>
+</div>
+<div id="mySidebar" class="sidebar">
+  <br><a href="#" style="font-size:30px;float:right;text-decoration: none;width:100%;text-align: right;" onclick="closeNav()">×&nbsp;</a><br><br>
+  
+
+<button id="descbtn" class=" sidebtn" onclick="hidefunc('desc');closeNav()" >
+  <i style="width:50px;font-size:24px;padding-left: 8px;" class="fas fa-chevron-right"></i>
+  <span> &nbsp;Description</span>
+</button ><br>
+<button id="syllbtn" class=" sidebtn" onclick="hidefunc('syll');closeNav()" >
+  <i style="width:50px;font-size:24px;padding-left: 8px;" class="fas fa-clipboard-list"></i> 
+  <span> &nbsp;Syllabus</span>
+</button ><br>
+<button id="topicsbtn" class=" sidebtn" onclick="hidefunc('topics');closeNav()" >
+  <i style="width:50px;font-size:24px;padding-left: 8px;" class="fas fa-list-ol"></i> 
+  <span> &nbsp;Topics</span>
+</button ><br>
+<button id="linkbtn" class=" sidebtn" onclick="hidefunc('link');closeNav()" >
+  <i style="width:50px;font-size:24px;padding-left: 8px;" class="fas fa-link"></i>
+  <span> &nbsp;Reference Links</span>
+</button ><br>
+<button id="instbtn" class=" sidebtn" onclick="hidefunc('inst');closeNav()" >
+  <i style="width:50px;font-size:24px;padding-left: 8px;" class="fas fa-chalkboard-teacher"></i>
+  <span> &nbsp;Teachers</span>
+</button><br>
+<button id="annbtn" class=" sidebtn" onclick="hidefunc('ann');closeNav()" >
+  <i style="width:50px;font-size:24px;padding-left: 8px;" class="fas fa-bullhorn"></i>
+  <span> &nbsp;Announcements</span>
+</button><br>
+<button id="assbtn" class=" sidebtn" onclick="hidefunc('ass');closeNav()" >
+  <i style="width:50px;font-size:24px;padding-left: 8px;" class="fas fa-file-download"></i>
+  <span> &nbsp;Assignments</span>
+</button><br>
+<a href="{% url 'quesRO' cid %}"><button class="sidebtn" >
+  <i style="width:50px;font-size:24px;padding-left: 8px;" class="fas fa-edit"></i>
+  <span> &nbsp;Questionnaire</span>
+</button></a><br>
+
+
+</div>
+<script>
+function openNav() {
+  document.getElementById("mySidebar").style.width = "210px";
+  document.getElementById("mySidebar").style.borderRight = "4px solid #E7F0FF";
+  //document.getElementById("main").style.marginLeft = "250px";
+}
+
+function closeNav() {
+  document.getElementById("mySidebar").style.width = "0";
+  document.getElementById("mySidebar").style.borderRight = "0px";
+  //document.getElementById("main").style.marginLeft= "0";
+}
+</script>
+
+<script>
+var curr='desc';
+document.getElementById(curr+'btn').style.backgroundColor = "#bddfff";
+function hidefunc(e) {
+    //for multiple properties, we can use:
+    //document.getElementById('desc').style.cssText = "display: none;background-color:#f8f9fa";
+
+  document.getElementById(curr+'btn').style.backgroundColor = "white";
+  document.getElementById(e+'btn').style.backgroundColor = "#bddfff";
+  document.getElementById(curr).style.display = "none";
+  document.getElementById(e).style.display = "block";
+  curr=e;
+}
+</script>
+<script>
+  function resClick(RTandT) {
+arr=RTandT.split(",")
+$.ajax({
+url:'/courses/Raccess/'+{{cid}}+'/'+arr[0]+'/'+arr[1] ,
+type:'get', 
+success: function(){
+//alert('success!')
+}
+})
+}
+</script>
+{% endblock %}

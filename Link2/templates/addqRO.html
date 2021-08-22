@@ -1,0 +1,57 @@
+{% extends 'basepage.html' %}
+{% block content %}
+{% if user.is_authenticated %}
+<div style="padding-top:24px;background-color:white"><h2><center>Questionnaires</center></h2><hr></div>
+<div class="container">
+{% if messages %}
+  {% for message in messages %}
+  {% if message.tags == 'warning'%}
+  <div class="alert alert-warning" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% elif message.tags == 'success'%}
+  <div class="alert alert-success" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {%endif%}
+  {% endfor %}
+{% endif %}
+<br>
+<div style="box-shadow: 0 0 12px #e9e9e9;padding:10px;background-color: white">
+	<h4>Test questionnaires</h4><hr>
+<div style="overflow-x: auto;">
+<table style="text-align: center" class="table table-bordered">
+	{% for things in all_q %}
+	<tr>
+	    <td><b>{{ things.name}}</b></td>
+		<td><p style="color:grey"><i>{{things.DT}}</i></p></td>
+		<td><a class="btn btn-outline-dark btn-sm" href="{% url 'pretest' things.id cr_crseid %}">Attempt</a></td>
+	</tr>
+	{% endfor %}
+</table>
+</div>
+</div>
+<br>
+
+<div style="box-shadow: 0 0 12px #e9e9e9;padding:10px;background-color: white">
+	<h4>Practice questionnaires</h4><hr>
+
+<center><form  id="searchform" action="{%  url 'searchques_stud' cr_crseid %}" method="POST">
+{% csrf_token %}
+<div class="col" style="max-width: 400px;display: inline-block;">
+      <select id="selectBox" class="custom-select mr-sm-2" name = "searchtopic" required>
+      	{% for topic in topics %}
+ 	  <option value="{{topic}}">{{topic}}</option>
+ 	    {% endfor %}
+      </select>
+    </div>
+ 
+<button class="btn btn-primary" type="submit">Attempt</button>
+</form>
+</center>
+</div>
+<br>
+</div>
+
+{% endif %}
+{% endblock %}

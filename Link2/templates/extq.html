@@ -1,0 +1,53 @@
+{% extends 'basepage.html' %}
+{% block content %}
+{% if user.is_authenticated and user.profile.ifTeacher %}
+<div style="padding-top:24px;background-color:white"><h2><center>External questionnaires</center></h2><hr></div><br>
+
+
+<div class="container">
+{% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-warning" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<form action="{% url 'extq' cid %}" method="POST">
+		{% csrf_token %}
+	<div class="row justify-content-md-center">
+	<div class="col-md-auto">
+		<center><input class="form-control" style="width:300px;margin-bottom:7px" type="text" placeholder="Questionnaire name" name="extname" required></center>
+	</div>
+	<div class="col-md-auto" >
+		<center><input class="form-control" type="number" style="width:300px;margin-bottom: 7px" name="mm" placeholder="max marks" required></center>
+	</div>
+	<div class="col-md-auto" ><center><button class="btn btn-primary" type="submit">Add questionnaire</button></center></div>
+	</div>
+</form>
+<hr>
+<div style="overflow-x: auto;">
+<table class="table table-bordered" style="background-color:white">
+	{% for i in allobj %}
+	<tr>
+		<td style="text-align: center;">
+			<a href="{% url 'extcontent' i.id %}" style="width: 100%" class="btn btn-outline-dark">{{i.name}}</a>
+		</td>
+		<td class="align-middle" style="text-align: center;">
+			<p>MM: <span style="background-color: #FFD907;padding: 5px;border-radius: 5px">&nbsp;{{i.mm}}&nbsp;</span></p>
+		</td>
+		<td style="text-align: center;color: grey">
+			<i>{{i.DT}}</i>
+		</td>
+		<td style="text-align: center;">
+			<a href="{% url 'delext' cid i.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+		</td>
+	</tr>
+	{% endfor %}
+</table>
+</div>
+</div>
+
+{% endif %}
+
+{% endblock %}

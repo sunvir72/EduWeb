@@ -1,0 +1,36 @@
+{% extends 'basepage.html' %}
+  {% block content %}
+  {% load static %}
+<div style="padding-top:24px;background-color:white"><h2><center>Embedded Files for {{cname}}</center></h2><hr></div><br>
+<div class="container">
+	{% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-success" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% endfor %}
+{% endif %}
+<center><h5>Add New File</h5>
+<form method="post" action="{% url 'add_dataset' cid %}" enctype="multipart/form-data">
+	{% csrf_token %}
+	<input type="text" name="name" class="form-control" style="display:inline;max-width: 400px" placeholder="Name" required>
+	<input style="border: 1px solid #0086FF;padding:2.5px;border-radius: 6px;width: 250px;overflow-x:hidden" type="file" name="newds" accept=".csv" required>
+	<button class="btn btn-primary" type="submit">Upload</button>
+</form></center>
+<hr><br>
+
+<div style="overflow-x: auto;">
+  <table bgcolor="white" class="table table-transparent">
+  <!-- <tr bgcolor="#f2f2f2"><td><center><b>Name</b></center></td><td><center><b>Topic</b></center></td><td></td><td></td></tr> -->
+  {% for f in files %}
+  <tr>
+  <td><img src="{% static "img/csvicon.jpg" %}" style="width:20px;height:26px;margin-right: 5px;"><p style="vertical-align: middle;display: inline;">{{f.name}}</p></td>
+  <td><center><i style="color:grey">{{f.DT}}</i></center></td>
+  <td><center><a href="{{f.dataset.url}}" target="_blank"> download</a></center></td>
+  <td><center><a class="btn btn-outline-danger btn-sm" href="{% url 'del_dataset' f.id cid %}">Delete</a></center></td>
+  </tr>
+  {% endfor %}
+  </table>
+</div>
+</div>
+{% endblock %}

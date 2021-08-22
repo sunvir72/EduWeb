@@ -1,0 +1,274 @@
+{% extends 'basepage.html' %}
+{% block content %}
+{% if user.is_authenticated and user.profile.ifTeacher %}
+<div style="padding-top:24px;background-color:white"><h2><center>Questionnaires</center></h2><hr></div>
+	<!-- The Modal -->
+  <div class="modal fade" id="bulk">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Bulk Upload</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <!-- Modal body -->
+        <div class="modal-body">
+<h4>Please note that the file must meet the following requirements:</h4>
+<ul>
+<li>The file must be a csv file</li>
+<li>Maximum 300 questions allowed per upload</li>
+<li>There must be <b>exactly 12</b> columns: 1 question, 6 options(2 are mandatory, rest can be left blank), 1 correct option, Points for correct answer, Negative Marks, Topic(<b>must already be added in this course, and is case sensitive</b>), Level(1=easy, 2=medium, 3=hard))</li>
+<li>Following is a small sample file: (All columns must be in <b>same order</b> as in the sample file, although names of headings(1st row) can be different)</li><br>
+</ul>
+<div style="overflow-x: auto;">
+<table bgcolor="white" class="table table-bordered">
+<tr>
+<td>Question</td>
+<td>option a</td>
+<td>option b</td>
+<td>option c</td>
+<td>option d</td>
+<td>option e</td>
+<td>option f</td>
+<td>Correct</td>
+<td>Points</td>
+<td>Negative</td>
+<td>Topic</td>
+<td>Level</td>
+<td>Feedback</td>
+</tr>
+<tr>
+<td>question 1</td>
+<td>op1-a</td>
+<td>op1-b</td>
+<td>op1-c</td>
+<td>op1-d</td>
+<td></td>
+<td></td>
+<td>b</td>
+<td>4</td>
+<td>1</td>
+<td>topic1</td>
+<td>2</td>
+<td>fb1</td>
+</tr>
+<tr>
+<td>question 2</td>
+<td>op2-a</td>
+<td>op2-b</td>
+<td>op2-c</td>
+<td>op2-d</td>
+<td>op2-e</td>
+<td>op2-f</td>
+<td>a,b</td>
+<td>4</td>
+<td>0</td>
+<td>topic2</td>
+<td>1</td>
+<td>fb2</td>
+</tr>
+<tr>
+<td>question 3</td>
+<td>op3-a</td>
+<td>op3-b</td>
+<td>op3-c</td>
+<td>op3-d</td>
+<td>op3-e</td>
+<td></td>
+<td>c</td>
+<td>6</td>
+<td>2</td>
+<td>topic1</td>
+<td>3</td>
+<td>fb3</td>
+</tr>
+</table>
+</div>
+<br>
+<center><form onsubmit="func1()" method="post" action="{% url 'bulkqn' -1 cid %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="file" accept=".csv" required>
+    <button id="uploading" class="btn btn-primary" type="submit" >Upload File</button>
+</form></center>
+<script>
+function func1(){
+document.getElementById("uploading").innerHTML = "<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>&nbsp;&nbsp; Uploading questions";
+}
+</script>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="container">
+{% if messages %}
+  {% for message in messages %}
+  {% if message.tags == 'warning'%}
+  <div class="alert alert-warning" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% elif message.tags == 'success'%}
+  <div class="alert alert-success" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {%endif%}
+  {% endfor %}
+{% endif %}
+<br>
+<center><a href="{% url 'extq' cid %}" class="btn btn-warning btn-block">External questionnaires</a></center><hr>
+<div style="padding: 10px;background-color: white;box-shadow: 0 0 12px #e9e9e9">
+<h4>Test questionnaires</h4><hr>
+<form action="{% url 'quesr' cid %}" method="POST">
+		{% csrf_token %}
+	<div class="row justify-content-md-center">
+	<div style="padding-bottom: 5px" class="col-md-auto">
+		<center><input style="width:250px" class="form-control" type="search" placeholder="Questionnaire Name" name="item" required></center>
+	</div>
+
+	<div style="padding-bottom: 5px" class="col-md-auto" >
+	<center><input class="form-control" style="display:inline-block;width: 100px" type="number" min="0" max="24" name="hrs" id="hrs" placeholder="Hours" required>
+	<input class="form-control" style="display:inline-block;width: 100px" type="number" min="1" max="60" name="min" id="min" placeholder="Minutes"  required></center>
+	</div>
+	<div class="col-md-auto" ><center><button class="btn btn-primary" type="submit">Add Questionnaire</button></center></div>
+	</div>
+</form>
+
+<hr>
+
+<div style="overflow-x: auto;">
+	<p style="display:inline;font-size: 25px;color:#00CF2F;vertical-align: middle;">&#9673;</p>Test Enabled <p style="padding-left: 7px;display:inline;font-size: 25px;color:grey;vertical-align: middle">&#9673;</p>Test Disabled<br><br>
+<table class="table table-bordered">
+	{% for things in all_q %}
+	<tr bgcolor="white">
+		{% if things.islive %}
+		<td style="width:50px"><p style="font-size: 25px;color:#00CF2F;">&#9673;</p></td>
+		{% else %}
+		<td><p style="font-size: 25px;color:grey">&#9673;</p></td>
+		{% endif %}
+	    <td style="align:left"><a class="btn btn-dark" style="width: 100%;" href="{% url 'qn' things.id cid%}">{{ things.name}}</a></td>
+		<td><center><a class="btn btn-outline-dark btn-sm" href="{% url 'qnr_attempts' things.id cid %}">Attempts</a></center></td>
+		<td><center><p style="color:">Time limit: {{things.time}}</p></center></td>
+		<td><center><p style="color:grey"><i>{{things.DT}}</i></p></center></td>
+		<td><center><a class="btn btn-outline-danger btn-sm" href="{% url 'delquesr' things.id cid %}">Delete</a></center></td>
+		{% if things.islive %}
+		<td><center><a class="btn btn-secondary btn-sm" href="{% url 'changelive' cid things.id 1 'q' %}">Disable</a></center></td>
+		{% else %}
+		<td><center><a class="btn btn-success btn-sm" href="{% url 'changelive' cid things.id 2 'q' %}">Enable</a></center></td>
+		{% endif %}
+		<td><a class="btn btn-outline-info btn-sm" href="{% url 'questionspdf' things.id -1 %}" target="_blank" >&#10515; PDF</a></td>
+	</tr>
+	{% endfor %}
+</table></div><div style="padding-top: 8px"></div></div>
+	<br>
+
+	<div style="padding: 10px;background-color: white;box-shadow: 0 0 12px #e9e9e9">
+		<h4>Practice questionnaires</h4><hr>
+		<p style="display:inline;font-size: 25px;color:#00CF2F;vertical-align: middle;">&#9673;</p>Topic Enabled <p style="padding-left: 7px;display:inline;font-size: 25px;color:grey;vertical-align: middle">&#9673;</p>Topic Disabled<br><br>
+		<center>
+		<div style="overflow-x:auto"> 
+		<table class="table table-bordered">
+			{% for t in topics %}
+			<tr bgcolor="white">
+				{% if t.islive %}
+				<td style="width:50px"><p style="font-size: 25px;color:#00CF2F;">&#9673;</p></td>
+				{% else %}
+				<td><p style="font-size: 25px;color:grey">&#9673;</p></td>
+				{% endif %}
+			    <td style="text-align:center"><a class="btn btn-light btn-link" style="min-width:250px;text-decoration:none" href="{% url 'searchques' cid t.id %}">{{ t.name}}</a></td>
+			    <td><center><a href="{% url 'pq_attempts' t.id cid %}" class="btn btn-outline-dark btn-sm">Attempts</a></center></td>
+				{% if t.islive %}
+				<td><center><a class="btn btn-secondary btn-sm" href="{% url 'changelive' cid t.id 1 't' %}">Disable</a></center></td>
+				{% else %}
+				<td><center><a class="btn btn-success btn-sm" href="{% url 'changelive' cid t.id 2 't' %}">Enable</a></center></td>
+				{% endif %}
+				<td><a class="btn btn-outline-info btn-sm" href="{% url 'questionspdf' -1 t.id %}" target="_blank">&#10515; PDF</a></td>
+			</tr>
+			{% endfor %}
+		</table></div>
+		</center>
+		
+
+</div>
+</div>
+<script>
+	$("#searchform").submit(function(e) {
+e.preventDefault();
+document.getElementById("searchbutton").innerHTML = "<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>&nbsp;&nbsp; ";
+var serializedData=$("#searchform").serialize();
+$.ajax({
+url:$("#searchform").attr('action'),
+type:'POST',
+data: serializedData,
+
+success: function(response){
+document.getElementById("searchbutton").innerHTML = "Search";
+$("#searchTable").html('');
+if(response.n==0){
+	$("#searchTable").html('<center style="padding:20px">Empty List!</center>');
+}
+for(var i=0;i<response.n;i++){
+
+	$("#searchTable").append('<tr style="background-color:white"><td>Q'+(i+1)+')</td><td><h5>'+response.ques[i]+'</h5><br>'+response.opa[i]+'<br>'+response.opb[i]+'<br>'+response.opc[i]+'<br>'+response.opd[i]+'<br>'+response.ope[i]+'<br>'+response.opf[i]+'<p style="color:#FFB100;display:inline-block">CORRECT: <b>'+response.correct[i]+'</b></p> | <p style="color:grey;display:inline-block">LEVEL: <b>'+response.level[i]+'</b></p></td><td><a class="btn  btn-sm btn-outline-danger" href="/courses/delpractqn/'+response.id[i]+'/{{cid}}">Delete</a></td></tr>');
+
+}
+$('html, body').animate({
+        scrollTop: $("#searchTable").offset().top
+    }, 1000);
+},
+error: function (textStatus, errorThrown) {
+      $("#searchbutton").html("Search");
+}
+})
+});
+</script>
+<script>
+	function showfunc(id){
+		if(id=='s'){
+			if(document.getElementById('searchform').style.display=="block"){
+				document.getElementById('searchform').style.display="none";
+				document.getElementById('searchTablediv').style.display="none";
+				document.getElementById('sbtn').className="btn btn-outline-success";
+			}
+			else{
+				document.getElementById('searchform').style.display="block"	;
+				document.getElementById('searchTablediv').style.display="block";
+				document.getElementById('sbtn').className="btn btn-success";
+			}
+			document.getElementById('addq').style.display="none";
+
+			document.getElementById('ubtn').className="btn btn-outline-success";
+		}
+		else{
+			if(document.getElementById('addq').style.display=="block"){
+				document.getElementById('addq').style.display="none";
+				document.getElementById('ubtn').className="btn btn-outline-success";
+			}
+			else{
+				document.getElementById('addq').style.display="block";	
+				document.getElementById('ubtn').className="btn btn-success";
+			}
+			document.getElementById('searchform').style.display="none";
+			document.getElementById('searchTablediv').style.display="none";
+
+			document.getElementById('sbtn').className="btn btn-outline-success";
+		}
+	}
+</script>
+<script>
+	//multiple selectbox select through this code. dont learn.
+$('option').mousedown(function(e) {
+    e.preventDefault();
+    var originalScrollTop = $(this).parent().scrollTop();
+    console.log(originalScrollTop);
+    $(this).prop('selected', $(this).prop('selected') ? false : true);
+    var self = this;
+    $(this).parent().focus();
+    setTimeout(function() {
+        $(self).parent().scrollTop(originalScrollTop);
+    }, 0);
+    
+    return false;
+});
+</script>
+{% endif %}
+
+{% endblock %}

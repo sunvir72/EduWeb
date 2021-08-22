@@ -1,0 +1,172 @@
+{% extends 'basepage.html' %}
+{% block content %}
+{% load static %}
+{% if user.is_authenticated %}
+{% if user.profile.ifTeacher %}
+<div style="padding-top:24px;background-color:white"><h2><center>Courses</center></h2><hr></div>
+<div class="container">
+{% if messages %}
+  {% for message in messages %}
+  {% if message.tags == 'warning'%}
+  <div class="alert alert-warning" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% elif message.tags == 'success'%}
+  <div class="alert alert-success" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {%endif%}
+  {% endfor %}
+{% endif %}
+<br>
+
+	{% if all_items %}
+
+<!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div style="background-color:#f1f1f1" class="modal-header">
+          <center><h5>Course Logs</h5></center>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <div id="body" class="modal-body">
+        	<form method="POST" action="{% url 'logs' %}">
+        	{% csrf_token %}
+			  <div class="row">
+			  	<div class="col"><center>
+			  		<p style="margin-bottom: 5px;font-size: 12.5px;white-space: nowrap;">Start Date</p>
+			        <input style="border:0.5px solid black;border-radius:5px;padding:4px" type="date" name="start" required></center></div>
+			    <div class="col"><center>
+			    	<p style="margin-bottom: 5px;font-size: 12.5px;white-space: nowrap;">End Date</p>
+			        <input style="border:0.5px solid black;border-radius:5px;padding:4px" type="date" name="end" required></center></div>
+			    <div class="col"><center>
+			    	<p style="margin-bottom: 5px;font-size: 12.5px;white-space: nowrap;">Course</p>
+			    	<div class="col">
+				      <select id="selectBox" class="form-control" style="border-color: black;" name = "course" required>
+				      	{% for i in all_items %}
+				 	  <option value={{i.id}}>{{i.item}}</option>
+					  {% endfor %}
+				      </select></div></center>
+				</div>
+				<div class="col"><center>
+			    	<p style="margin-bottom: 5px;font-size: 12.5px;white-space: nowrap;">Logs type</p>
+			    	<div class="col">
+				      <select id="selectBox" class="form-control" style="border-color: black;" name = "logtype" required>
+				 	  <option value="r">Resource logs</option>
+				 	  <option value="t">Test questionnaire logs</option>
+				 	  <option value="tq">Test questions logs</option>
+				 	  <option value="p">Practice questions logs</option>
+				      </select></div></center>
+				</div>
+			   </div><hr>
+			  <center><button class="btn btn-success" type="submit">Download CSV</button></center>
+			</form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="deleteModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+
+        <div class="modal-body">
+        	<center>
+        	<h4>Are you sure?</h4><hr>
+        	<a id="delbtn" href="#" class="btn btn-danger">Yes, Delete</a>
+        	<button type="button" class="btn btn-success" data-dismiss="modal">No, Go back</button>
+        	</center>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<form class="form-inline my-2 my-lg-0" action="{% url 'Link2' %}" method="POST">
+{% csrf_token %}
+<div class="row" style="width:100%">
+	<div class="col" style="width:75%">
+	<input style="width:100%;border-radius:0px" class="form-control mr-sm-2" type="search" placeholder="Add New Course" aria-label="Search" name="item" required></div>
+	<div class="col-md-auto">
+	<button class="btn btn-primary" type="submit">Add Course</button></div>
+	<div class="col-md-auto">
+		<button type="button" style="white-space:nowrap" class="btn btn-success" data-toggle="modal" data-target="#myModal">
+	      <svg class="bi bi-download" style="font-size: 18px" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+		  <path fill-rule="evenodd" d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"/>
+		  <path fill-rule="evenodd" d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"/>
+		  <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"/></svg> &nbsp; Download course logs
+	</button>
+	</div>
+</div>
+</form>	<br>
+{% for things in all_items %}
+	<a href="{% url 'courseInfo' things.id %}" style="text-decoration: none;color: black;">
+	<div class="row courseCard" >
+	  <div class="col-md-auto" style="padding-left:0"><img style="background-color:white;display:inline-block" src="{% static "img/courseIcon.jpg" %}" width="180" height="160" align="middle"></div>
+	  <div class="col my-auto"><!-- my auto for vertical align middle -->
+	    <h4>{{ things.item}}</h4>
+	    <p style="color:grey">{{things.desc|truncatewords:27}}</p>
+	    <a class="btn btn-outline-info" href="{% url 'studlist' things.id %}">Student List</a>
+	    <a class="btn btn-outline-success" href="{% url 'embfiles' things.id %}">Embedded Files</a>
+	  </div>
+	  <div class="col-md-auto" style="padding: 0;padding-right: 10">
+	  	<button type="button"  data-toggle="modal" data-target="#deleteModal" style="border-radius:0;border-top-color:transparent;" class="btn btn-outline-danger btn-sm" onclick="document.getElementById('delbtn').href=this.id" id="{% url 'delete' things.id %}">Delete</button>
+	  </div>
+	</div>
+	</a>		
+{% endfor %}
+
+	{% endif %}
+</div>
+{% else %}
+<div style="padding-top:24px;background-color:white"><h2><center>Courses</center></h2><hr></div>
+<div class="container">
+{% if messages %}
+  {% for message in messages %}
+  {% if message.tags == 'warning'%}
+  <div class="alert alert-warning" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% elif message.tags == 'success'%}
+  <div class="alert alert-success" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {%endif%}
+  {% endfor %}
+{% endif %}
+
+{% for cid,name,reg,desc in lst %}
+	<a href="{% url 'courseRO' cid %}" style="text-decoration: none;color: black;">
+	<div class="row courseCard" >
+	  <div class="col-md-auto" style="padding-left:0"><img style="background-color:white;display:inline-block" src="{% static "img/courseIcon.jpg" %}" width="180" height="160" align="middle"></div>
+	  <div class="col my-auto"><!-- my auto for vertical align middle -->
+	    <h4>{{name}}</h4>
+	    <p style="color:grey">{{desc|truncatewords:28}}</p>
+	    <a></a><!-- Quick jugaad fix for some alignment issues -->
+	  </div>
+	  <div class="col-md-auto" style="padding: 0;padding-right: 5">
+	  		{% if reg %}
+			<button class="btn btn-success" style="color:white;border-radius:0">registered</button>
+			{% else %}
+			<a class="btn btn-outline-success" href="{% url 'crossofff' cid %}" style="width:95px;border-radius:0">register</a>
+			{% endif %}
+	  </div>
+	</div>
+	</a>		
+{% endfor %}
+</div>
+
+{% endif %}
+
+{% else %}
+<div class="container">
+    <br>
+    <h3>Login to view this page</h3>
+</div>
+{% endif %}
+
+{% endblock %}

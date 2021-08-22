@@ -1,0 +1,104 @@
+{% load static %}
+<html>
+<head>
+<link rel="shortcut icon" type="image/png" href="{% static 'img/fg.png' %}" />
+<title>EduWeb</title>
+
+<style>
+
+body {
+margin:0;
+font-family: arial;
+}
+
+</style>
+<style>
+h1,h2,h3,h4,h5,h6,p {
+  font-family:Arial;
+}
+
+div {
+  word-wrap: break-word;
+}
+
+</style>
+ <style>
+table.hhh, td.hhh {
+  border: 0.5px solid #DBDBDB;
+  text-align: center;
+  padding-top:6px;
+  padding-left:10px;
+  padding-right:10px;
+  padding-bottom:6px; 
+  font-family: arial;
+  background-color: white;
+}
+
+table.hhh {
+  border-collapse: collapse;
+  width: 100%;
+}
+th.hhh{
+  font-family: arial;
+  background-color: #EAEAEA;
+}
+table.hh, td.hh {
+  font-size: 12px;
+  font-family: arial;
+  background-color: white;
+  padding-bottom: 3px;
+}
+
+table.hh {
+  border-collapse: collapse;
+  
+}
+
+</style>
+ 
+</head>
+
+<body>
+	
+	<hr><table class="hh">
+		<tr><td style="width:140px;border-right: 0.5px solid grey">Name: </td><td style="padding-left:30px" >{{qnrattepmt.name}}</td></tr>
+		<tr><td style="width:140px;border-right: 0.5px solid grey">Email: </td><td style="padding-left:30px" >{{qnrattepmt.email}}</td></tr>
+		<tr><td style="width:140px;border-right: 0.5px solid grey">Questionnaire: </td><td style="padding-left:30px" >{{qnrattepmt.qnr.name}}</td></tr>
+		<tr><td style="width:140px;border-right: 0.5px solid grey">Attempted on: </td><td style="padding-left:30px" >{{qnrattepmt.DT}}</td></tr>
+		<tr><td style="width:140px;border-right: 0.5px solid grey">Score: </td><td style="padding-left:30px" >{{qnrattepmt.score}}</td></tr>
+	</table>
+	<hr><br><br>
+	<table class="hhh">
+			<tr class="hhh">
+			<td class="hhh" style="border-color:white"></td>
+			<th class="hhh"><center>
+			<b>Question</b>
+			</center></th>
+			<th style="width:77px" class="hhh"><center>
+			<b>Answer</b>
+			</center></th>
+			</tr>
+			{% for at in q_attempts %}
+			<tr class="hhh" >
+			<td style="width:30px" class="hhh">
+			Q{{forloop.counter}}</td>
+			<td style="text-align:left" class="hhh">{{at.ques.ques}}
+			</td>
+			<td style="width:77px" class="hhh">
+			
+			{% if at.stat == 1 %}
+			<p style="color:#0CBD00">+{{at.ques.marks}}</p>
+			{% elif at.stat == 2 %}
+			<p style="color:red">-{{at.ques.neg}}</p>
+			{% else %}
+			<p style="color:grey">NA</p>
+			{% endif %}
+			</td>
+			</tr>
+			{% endfor %}
+		</table>
+		<br>
+</div>
+
+</body>
+</html>

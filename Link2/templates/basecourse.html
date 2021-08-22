@@ -1,0 +1,173 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+  <head>
+  <link rel="shortcut icon" type="image/png" href="{% static 'img/fg.png' %}" />
+<title>EduWeb</title>
+
+<style>
+h1,h2,h3,h4,h5,h6,p {
+  font-family:Arial;
+}
+div {
+  word-wrap: break-word;
+}
+</style>
+  <style> 
+  .top-container {
+  background-color: #FFF6E9;
+  padding: 0.1px;
+  text-align: center;
+}
+
+.sidebar {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: white;
+  overflow-x: hidden;
+  transition: 0.3s;
+  padding-top: 60px;
+}
+input[type=submit] {
+  background-color: #376DF3;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.sidebtn {
+  background-color: white;
+  border:none;
+  width: 100%; 
+  white-space: nowrap;
+  overflow-x: hidden; 
+  text-align: left !important ;
+  padding: 10px !important; 
+
+}
+.sidebtn:hover{
+  background-color: #bddfff !important;
+}
+/* to remove border around button when clicked */
+.sidebtn:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+p.hh {
+margin: 0;
+padding: 0;
+}
+hr.hh{
+border-color:#97B7E1;
+margin: 0;
+padding: 0;
+margin-left:400px;
+margin-right:400px;
+margin-bottom:10px;
+}
+</style>
+<script src="https://kit.fontawesome.com/58ba01a270.js" crossorigin="anonymous"></script>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <title>Courses</title>
+  </head>
+  <style>
+  html, body{ 
+   margin:0; 
+  }
+  body{ 
+  background-color:#F9F9F9;
+
+}
+main{
+min-height:calc(100vh - 190px);
+}
+
+footer{
+  margin-top:auto; 
+}
+  </style>
+  <body >
+  <main>
+{% if user.is_authenticated %}
+{% if user.profile.ifTeacher %}
+<nav style="background-color:#333D4B;box-shadow: 0 0 10px grey;z-index:2" class="navbar navbar-expand-lg navbar-dark ">
+
+  <a style="width: 163; text-align: center;" class="navbar-brand" href="/"><img src="{% static "img/gr_t.png" %}" width="163" height="35" align="middle"></a>
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarText">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/courses">Courses</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/ml">ML portal</a>
+      </li>
+    </ul>
+    <span class="navbar-text" style="padding: 0">
+      <a class="nav-item nav-link" style="color:#D5F2F7;display: inline-block;padding-left: 0" >
+       <svg class="bi bi-person-fill" width="1em" style="font-size: 20px" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+       <path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+   &nbsp;<strong>{{user.first_name}}</strong></a>
+    <a style="color:white;color:#F1F1F1;font-size: 14px;" class="btn btn-outline-success" href="{% url 'log_out' %}">Logout</a>
+    </span>
+  </div>
+</nav>
+{% else %}
+<nav style="background-color:#333D4B;box-shadow: 0 0 10px grey;z-index:2" class="navbar navbar-expand-lg navbar-dark ">
+
+  <a style="width: 163; text-align: center;" class="navbar-brand" href="/"><img src="{% static "img/gr_t.png" %}" width="163" height="35" align="middle"></a>
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarText">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/courses">Courses</a>
+      </li>
+    </ul>
+    <span class="navbar-text" style="padding: 0">
+      <a class="nav-item nav-link" style="color:#D5F2F7;display: inline-block;padding-left: 0" >
+       <svg class="bi bi-person-fill" width="1em" style="font-size: 20px" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+       <path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+   &nbsp;<strong>{{user.first_name}}</strong></a>
+    <a style="color:white;color:#F1F1F1;font-size: 14px;" class="btn btn-outline-success" href="{% url 'log_out' %}">Logout</a>
+    </span>
+  </div>
+
+</nav>
+{% endif %}
+{% endif %}
+
+
+<!-- hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh -->
+  <script>
+ if ('scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual'
+}
+</script>
+
+{% block content %}
+{% endblock %}
+<br>
+</main>
+<div style="padding-top:100px"></div>
+<footer class="footer" style="padding-top:10px;background-color:#333D4B;display:inline-block;width:100%"><center><p class="hh" style="color:#7C97BB;display:inline-block;padding-right:10px">contact</p><p class="hh" style="padding-top:2px;color:#EBF4FF;padding-bottom:10px;display:inline-block">eduweb.72@gmail.com</p><hr class="hh"><p style="color:#7C97BB">&copy;&nbsp;2020 EduWeb</p></center></footer>
+
+</body>
+</html>

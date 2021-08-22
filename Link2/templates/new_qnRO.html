@@ -1,0 +1,404 @@
+{% extends 'basepage.html' %}
+{% load static %}
+{% block content %}
+{% if user.is_authenticated %}
+<div style="padding-top:24px;background-color:white"><h2><center>Questionnaire: {{curr_q.name}}</center></h2><hr></div>
+<div class="container">
+
+<center><br>
+<div id="topmsg">
+<div class="row" style="box-shadow:0 0 15px #d6d6d6;max-width:840px;padding:5;border-radius:10px;background-color:white">
+  <div class="col-2" style="max-width:80px">
+    <img style="max-height:60px;max-width:60px" src="{% static 'img/lock_anim.gif' %}">
+  </div>
+  <div class="col-md-auto">
+    <b><h5>All Security Checks are now <span style="background-color:#FFE400">LIVE</span>. Do not go out of this page's scope<br></b>(This includes clicking on your taskbar)</h5></b>
+  </div>
+</div>
+</div>
+<br>
+<button id="startTest" class="btn btn-outline-warning" style="width:200px" onclick="openFullscreen();">Start Test</button><br><br>
+
+<div id="outermsg" style="display:none">Current status:<span id="status" style="color:red">Offline</span><br>
+<span id="outerGrow"><div class="spinner-grow spinner-grow-sm text-warning" role="status"></div>Trying to reconnect..<br><br><b><h5 style="border:2.5px solid #FFC600">NOTE:</b>The moment connection is re-established, all security checks would be turned on, and going out of this page's scope would result in disqualification. So, go out of this page's scope only while the current status above is 'offline' <br>(This includes clicking on your taskbar)</h5></span></div>
+</center>
+<script>
+  var fm=0;
+  $(document).ready(function() {
+    $(window).blur(function() {
+      if(isSecurityLive){
+        fm=fm+1;
+        document.getElementById("msg2").append(" forbidden move"+fm+" |")
+      }
+      //alert("This is a forbidden move \nYou have commited "+fm+" forbidden moves");
+  });
+  });
+</script>
+
+<div id="myid" style="display:none;background-color:#f9f9f9;overflow:auto;" class="container">
+<center><b><h5 id="clr" style="background-color:#37bc42;padding:10px;position:fixed;right:0;width:100%;color:white"><span style="color:wheat">Time Left: </span><span id="demo"> </span> <button data-toggle="modal" data-target="#deleteModal" class="btn btn-sm btn-danger" style="position:fixed;right:10px;top:7">End</button> </h5></b><br><br>
+
+    <div class="modal fade" id="deleteModal">
+      <br>
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+
+        <div class="modal-body">
+          <center>
+          <h4>Are you sure?</h4><hr>
+          <a id="delbtn" href="{% url 'quesRO' cid %}" class="btn btn-danger">Yes, End Test</a>
+          <button type="button" class="btn btn-success" data-dismiss="modal">No, Go back</button>
+          </center>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<h4 style="background-color:#e9e9e9;padding:7px;border-radius: 8px;margin-top:5px" >{{curr_q.name}}</h4>
+<hr>
+
+<div style="border:2.5px solid #F8DB1A;border-radius:10px;padding:8px;display:none" id="msg"></div></center>
+
+<div id="msg2"></div>
+
+<center style="font-size:18px">Question <span id="qno">1</span>/{{all_q|length|add:1}}</center> 
+<br>
+<form id="formID" onsubmit="event.preventDefault(); subform();" method="POST" action="{% url 'evaluateQ' qnr_att_id currques.id nqid %}" >
+{% csrf_token %}
+<table id="tableID" style="white-space: normal;" class="table table-transparent" >
+<tr style="background-color:white;box-shadow: 0 0 12px #e6e6e6;" ><td id="rowID">
+<h4 style="white-space: pre-wrap">{{currques.ques}}</h4>
+{% if currques.img %}<br>
+  <img src="{{currques.img.url}}" style="max-width:400px;max-height:400px"><br><br>
+  {% endif %}
+<h5>
+{% if currques.isradio %}
+
+<input type="radio" name="options" value="a">  a) {{currques.opt1}}</input><br>
+<input type="radio" name="options" value="b">  b) {{currques.opt2}}</input><br>
+{% if currques.opt3 %}<input type="radio" name="options" value="c">  c) {{currques.opt3}}</input><br>{% endif %}
+{% if currques.opt4 %}<input type="radio" name="options" value="d">  d) {{currques.opt4}}</input><br>{% endif %}
+{% if currques.opt5 %}<input type="radio" name="options" value="e">  e) {{currques.opt5}}</input><br>{% endif %}
+{% if currques.opt6 %}<input type="radio" name="options" value="f">  f) {{currques.opt6}}</input><br>{% endif %}
+{% else %}
+<input type="checkbox" name="options[]" id="checkboxID" value="a">  a) {{currques.opt1}}</input><br>
+<input type="checkbox" name="options[]" id="checkboxID" value="b">  b) {{currques.opt2}}</input><br>
+{% if currques.opt3 %}<input type="checkbox" name="options[]" id="checkboxID" value="c">  c) {{currques.opt3}}</input><br>{% endif %}
+{% if currques.opt4 %}<input type="checkbox" name="options[]" id="checkboxID" value="d">  d) {{currques.opt4}}</input><br>{% endif %}
+{% if currques.opt5 %}<input type="checkbox" name="options[]" id="checkboxID" value="e">  e) {{currques.opt5}}</input><br>{% endif %}
+{% if currques.opt6 %}<input type="checkbox" name="options[]" id="checkboxID" value="f">  f) {{currques.opt6}}</input><br>{% endif %}
+{% endif %}
+</h5>
+</td></tr>
+</table>
+<center><button id="next" class="btn btn-primary">Next</button></center>
+</form>
+</div>
+
+<script>
+  var curr_attempts=0;
+  var currquesid={{currques.id}};
+  var quesIndex=0;
+  var nextIndex=1;
+  var quesIDs={{all_q|safe}};
+  var cid={{cid}};
+  //var isradio={{currques.isradio}};
+  var qnr_att_id={{qnr_att_id}};
+  var ispaused=false;
+  var isSecurityLive=true;
+  var disconnection_count=0;
+  var rcn;
+</script>
+
+<script>
+function subform(){
+var serializedData=$("#formID").serialize(); 
+  //document.getElementById("rowID").innerHTML='<center><div class="spinner-grow text-primary" style="vertical-align:middle;" role="status"></div>Fetching Question</center>';
+
+$.ajax({
+//url:'/courses/getNextPQ/'+quesIDs[quesIndex],
+url:$("#formID").attr('action'),// '/courses/evaluateQ/'+qnr_att_id+'/'+currquesid+'/'+quesIDs[quesIndex],
+data:serializedData,
+type:'post',
+success: function(response){
+
+  if(response.finish){
+    location.replace("/courses/quesRO/"+cid);
+    return false;
+  }
+  //This seems redundant:
+  if(ispaused){
+    resumeTimer();
+    ispaused=false;
+    document.getElementById("msg").style.display="none";
+  }
+
+  setTimeout(function(){ isSecurityLive=true; }, 3500);//To avoid errors(like when it's live and user doesnt know) basicalyy 3.5s bonus
+
+  if(nextIndex==quesIDs.length){
+    document.getElementById("formID").action='/courses/evaluateQ/'+qnr_att_id+'/'+quesIDs[quesIndex]+'/-1'; //+'/'+quesIDs[quesIndex];
+  }
+  else{
+    document.getElementById("formID").action='/courses/evaluateQ/'+qnr_att_id+'/'+quesIDs[quesIndex]+'/'+quesIDs[nextIndex]; //+'/'+quesIDs[quesIndex];
+  }
+  document.getElementById("tableID").innerHTML='<tr style="background-color:white;box-shadow: 0 0 12px #e6e6e6;" ><td style="white-space:pre-wrap" id="rowID"></td><tr>';
+  document.getElementById("rowID").innerHTML='<h4>'+response.ques.replace(/\</g,"&lt;")+'</h4>';
+  if(response.imgurl){
+    $("#rowID").append('<img src="'+response.imgurl+'" style="max-width:400px;max-height:400px"><br><br>');
+  }
+  
+  if(response.isradio){
+    $("#rowID").append('<h5 id="opts"><input type="radio" name="options" value="a">  a) '+response.opt1.replace(/\</g,"&lt;")+'</input><br><input type="radio" name="options" value="b">  b) '+response.opt2.replace(/\</g,"&lt;")+'</input><br></h5>');
+    if(response.opt3){
+      $("#opts").append('<input type="radio" name="options" value="c">  c) '+response.opt3.replace(/\</g,"&lt;")+'</input><br>');}
+    if(response.opt4){
+      $("#opts").append('<input type="radio" name="options" value="d">  d) '+response.opt4.replace(/\</g,"&lt;")+'</input><br>');}
+    if(response.opt5){
+      $("#opts").append('<input type="radio" name="options" value="e">  e) '+response.opt5.replace(/\</g,"&lt;")+'</input><br>');}
+    if(response.opt6){
+      $("#opts").append('<input type="radio" name="options" value="f">  f) '+response.opt6.replace(/\</g,"&lt;")+'</input><br>');}
+  }
+  else{
+    $("#rowID").append('<h5 id="opts"><input type="checkbox" name="options[]" id="checkboxID" value="a">  a) '+response.opt1.replace(/\</g,"&lt;")+' </input><br> <input type="checkbox" name="options[]" id="checkboxID" value="b">  b) '+response.opt2.replace(/\</g,"&lt;")+'</input><br></h5>');
+    
+    if(response.opt3){
+      $("#opts").append('<input type="checkbox" name="options[]" id="checkboxID" value="c">  c) '+response.opt3.replace(/\</g,"&lt;")+'</input><br>');}
+    if(response.opt4){
+      $("#opts").append('<input type="checkbox" name="options[]" id="checkboxID" value="d">  d) '+response.opt4.replace(/\</g,"&lt;")+'</input><br>');}
+    if(response.opt5){
+      $("#opts").append('<input type="checkbox" name="options[]" id="checkboxID" value="e">  e) '+response.opt5.replace(/\</g,"&lt;")+'</input><br>');}
+    if(response.opt6){
+      $("#opts").append('<input type="checkbox" name="options[]" id="checkboxID" value="f">  f) '+response.opt6.replace(/\</g,"&lt;")+'</input><br>');}
+  }
+  quesIndex=quesIndex+1;
+  nextIndex=nextIndex+1;
+  //why this?:
+  //isradio=response.isradio;
+  document.getElementById("qno").innerHTML=quesIndex+1;//Update ques no.
+  },
+  error: function (textStatus, errorThrown) {
+    disconnection_count=disconnection_count+1;
+    if(disconnection_count>5){
+      //disqualify
+    }
+    var inputs = document.getElementsByName("options");
+    for (var i = 0; i < inputs.length; i++) { 
+        inputs[i].disabled = true;
+    } 
+    document.getElementById("msg").style.display="inline-block";//delete revert action from above
+    document.getElementById("msg").innerHTML='&#9432;You are disconnected from the internet<br><div class="spinner-grow spinner-grow-sm text-warning" role="status"></div>Trying to reconnect..';
+
+    if(!ispaused){
+      pausefunc();
+      ispaused=true;
+    }
+    document.getElementById("next").disabled=true;
+    document.getElementById("startTest").disabled=true;
+
+    /*var counter=0;
+    while(true){
+      counter=counter+1;
+      if(counter>5){
+        break;
+      }
+      document.getElementById("msg2").append(" in loop! ")
+      reconnectfunc();
+      if(ispaused==false){
+        break;
+      }
+    }*/
+    var counter=0;
+    var rcnTemp = setInterval(function() {
+      if(ispaused==false){
+        clearInterval(rcnTemp);
+      }
+      else{
+        counter=counter+1;
+        if(counter>4){
+          if(ispaused==false){
+            clearInterval(rcnTemp);
+          }
+          else{
+            clearInterval(rcnTemp);
+            reconnect_inf();//Didnt write this code below because i think in JS there is parallel execution. So while this setInterval is running, the below code is also.
+          }
+        }
+          reconnectfunc();
+      }
+      },5000);
+
+    /*if(ispaused!=false){
+      document.getElementById("msg").innerHTML='&#9432;You are disconnected from the internet<br><div class="spinner-grow spinner-grow-sm text-warning" role="status"></div>Trying to reconnect..<br>The security checks are temporarily paused. You can exit fullscreen, check your connection and resume the test once you are back online';
+      isSecurityLive=false;
+      document.getElementById("outermsg").style.display="block";
+      document.getElementById("outerGrow").style.display="block";
+      document.getElementById("status").style.color="red";
+      document.getElementById("status").innerHTML="Offline";
+      rcn = setInterval(function() {
+        reconnectfunc();
+      },5000);
+    }*/
+    
+  }
+  })
+}      
+</script>
+
+<script>
+  function reconnect_inf(){
+    document.getElementById("msg").innerHTML='&#9432;You are disconnected from the internet<br><div class="spinner-grow spinner-grow-sm text-warning" role="status"></div>Trying to reconnect..<br><b style="background-color:#ffd92196">The security checks are temporarily paused. You can exit fullscreen, check your connection and resume the test once you are back online</b>';
+      isSecurityLive=false;
+      document.getElementById("outermsg").style.display="block";
+      document.getElementById("outerGrow").style.display="block";
+      document.getElementById("status").style.color="red";
+      document.getElementById("status").innerHTML="Offline";
+      rcn = setInterval(function() {
+        reconnectfunc();
+      },5000);
+  }
+</script>
+
+<script>
+var elem = document.getElementById("myid");
+var distance;
+var x;
+var flagr=0;
+var flagy=0;
+var hh="{{curr_q.time}}";
+var firstCountDownDate=true;
+// your input string
+var a1 = hh.split(':'); // split it at the colons
+// minutes are worth 60 seconds. Hours are worth 60 minutes.
+var seconds1 = (+a1[0])*60*60*1000 + (+a1[1])*60*1000 + 1000;
+var countDownDate; 
+
+function openFullscreen() {
+  isSecurityLive=true;
+  document.getElementById("topmsg").style.display="none";
+  elem.style.display = "block";
+    
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) { 
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { 
+    elem.msRequestFullscreen();
+  }
+  
+startTimer();
+}
+</script>
+
+<script>
+  function startTimer(){
+    ispaused=false;
+    if(firstCountDownDate){
+      countDownDate= new Date().getTime()+seconds1;
+      firstCountDownDate=false;
+    }
+
+    x = setInterval(function() {
+
+    // Get today's date and time
+    var now = new Date().getTime();
+      
+    // Find the distance between now and the count down date
+    distance = countDownDate - now; //in ms
+
+    var seconds1=Math.floor(distance / 1000);
+    //document.getElementById("time").value=seconds1;----
+
+    // Time calculations for days, hours, minutes and seconds
+    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); //((distance) / (1000 * 60 * 60)) this would work. % was to counter days
+    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)); //(1000 * 60 * 60) so that minutes dont exceed 60min, 1000*60*60 is 60 min in ms
+    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      
+    // Output the result in an element with id="demo"
+    document.getElementById("demo").innerHTML =hours + "h "
+    + minutes + "m " + seconds + "s ";
+      
+    // If the count down is over, write some text 
+    if (distance < 0) {
+      clearInterval(x);
+      document.getElementById("demo").innerHTML = "EXPIRED";
+      //location.replace("/courses/quesRO/"+cid);
+    }
+    if ( flagy==0 && distance < 1200000) {
+      document.getElementById("clr").style.backgroundColor = "#F4D850";
+    flagy=1;
+    }
+    if (flagr==0 && distance < 300000 ) {
+      document.getElementById("clr").style.backgroundColor = "#F45050";
+    flagr=1;
+    }
+  }, 200);
+  }
+</script>
+
+<script>
+  function pausefunc(){
+    clearInterval(x);
+    document.getElementById("startTest").innerHTML="Resume Test";
+    //var tempdist=distance;
+    //countDownDate=new Date().getTime()+tempdist;
+  }  
+  function resumeTimer(){
+    countDownDate=new Date().getTime()+distance;
+    startTimer();
+  }
+</script>
+
+<script>
+
+// Events
+document.addEventListener("fullscreenchange", function() {
+
+if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+  elem.style.display = "none";
+    //location.replace("/courses/quesRO/"+cid);
+    }
+    else{
+    }
+});
+
+</script>
+
+<script>
+  function reconnectfunc(){
+      $.ajax({
+      url:$("#formID").attr('action'),
+      type:'get',
+      success: function(response){
+        ispaused=false;//If reconnection without exiting fullscreen
+        clearInterval(rcn);
+        document.getElementById("msg").style.display="none";
+        document.getElementById("startTest").disabled=false;
+        document.getElementById("outerGrow").style.display="none";
+        document.getElementById("status").style.color="#00CB0A";
+        document.getElementById("status").innerHTML="Online";
+        document.getElementById("next").disabled=false;
+        document.getElementById("next").click();
+        resumeTimer();//check this
+      },
+      /*error: function(response){}*/
+    })
+    }
+</script>
+
+<!--
+<script>
+function uncheck(el) {
+ var ele = document.getElementsByName(el);
+   for(var i=0;i<ele.length;i++)
+      ele[i].checked = false;
+}
+</script>
+-->
+</div>
+
+{% endif %}
+
+{% endblock %}

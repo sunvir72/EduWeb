@@ -1,0 +1,33 @@
+{% extends 'basepage.html' %}
+{% block content %}
+{% load static %}
+<div style="padding-top:24px;background-color:white"><h2><center>Resources</center></h2><hr></div>
+<div class="container">
+{% if messages %}
+  {% for message in messages %}
+  {% if message.tags == 'warning'%}
+  <div class="alert alert-warning" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% elif message.tags == 'success'%}
+  <div class="alert alert-success" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {%endif%}
+  {% endfor %}
+{% endif %}
+<br>
+
+<div style="overflow-x: auto;">
+  <table class="table table-transparent">
+  <tr bgcolor="#f2f2f2"><td><b>Link</b></td></tr>
+  {% for it in resources %}
+  <tr>
+  <td><a href="{{it}}" target="_blank">{{it}}</a></td>
+  </tr>
+  {% endfor %}
+  </table>
+</div>	
+</div>
+
+{% endblock %}

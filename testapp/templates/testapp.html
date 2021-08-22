@@ -1,0 +1,50 @@
+{% extends 'basepage.html' %}
+{% block content %}
+{% load static %}
+{% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-success" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<div style="background-color: white;margin-top:-55px" class="back_div"></div>
+<br>
+<center>
+  <br>
+  <div style="margin-top:-264px"><h4 style="background-color:white;padding: 5px;width: 245px;margin-left: 105px;margin-top: -5px;">Welcome to EduWeb</h4><p style="color:grey;display:inline-block;width: 252px;margin-left: 105px;background-color: white;">An educational portal for students and teachers</p></div></center>
+  <div class="container" style="padding-top:30px">
+ <center> Some Key features of the website are:</center>
+  <br>
+<div style="background-color: white;margin-bottom: 15px;box-shadow: 0 0 10px #e7e7e7" class="row" >
+  <div class="col-md-auto my-auto"><img style="background-color:white;display:inline-block" src="{% static "img/5.png" %}" width="200" height="180" align="middle"></div>
+  <div class="col my-auto" style="vertical-align:middle">
+    <h4>Courses</h4><p style="color:grey">- Teachers can easily create new courses<br>- They can enroll students in them, upon which an automated course invite is sent to each student<br>-Students on the other hand can register for the courses that they are enrolled for</p>
+  </div>
+</div>
+<div style="background-color: white;margin-bottom: 15px;box-shadow: 0 0 10px #e7e7e7" class="row" >
+  <div class="col-md-auto my-auto"><img style="background-color:white;display:inline-block" src="{% static "img/7.jpg" %}" width="200" height="140" align="middle"></div>
+  <div class="col my-auto" style="vertical-align:middle">
+    <h4>Content</h4><p style="color:grey">- Teachers can upload course contents which the students can access at any time. Some of these are: <br>> Announcements<br>> Reference links<br>> Assignments<br>> Practice questionnaires and Tests</p>
+  </div>
+</div>
+<div style="background-color: white;margin-bottom: 15px;box-shadow: 0 0 10px #e7e7e7" class="row" >
+  <div class="col-md-auto my-auto"><img style="background-color:white;display:inline-block" src="{% static "img/6.png" %}" width="200" height="180" align="middle"></div>
+  <div class="col my-auto" style="vertical-align:middle">
+    <h4>Questionnaires</h4><p style="color:grey">- Teachers can easily create questionnaires<br>- Each question can have positive and negative marks and upto six options<br>- Time limit can also be set for them <br>- Questions can either be added one by one or bulk uploaded through a csv file<br>- These can be monitored and Email reminders can be sent to students who have not yet attempted them <br>-  When a student attempts a test, the screen goes into fullscreen mode<br>-  The test would be submitted automatically if the student tries to exit fullscreen</p>
+  </div>
+</div>
+<div style="background-color: white;margin-bottom: 15px;box-shadow: 0 0 10px #e7e7e7" class="row" >
+  <div class="col-md-auto my-auto"><img style="background-color:white;display:inline-block" src="{% static "img/2.jpg" %}" width="200" height="180" align="middle"></div>
+  <div class="col my-auto" style="vertical-align:middle">
+    <h4>Machine learning</h4><p style="color:grey">- Every activity of student is monitored and stored in the backend to create datasets<br>- Teachers can work on these datasets and appy machine learning models <br> - They can even upload their own dataset and work on it</p>
+  </div>
+</div>
+
+  <br>
+  </div>
+
+{% endblock %}
+
+

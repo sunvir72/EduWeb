@@ -1,0 +1,144 @@
+{% extends 'basepage.html' %}
+  {% block content %}
+<div style="background-color:white"><br><h2><center>Student attempts for topic: <b>{{topic}}</b></center></h2><hr></div><br>
+<div class="container">
+
+<!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div style="background-color:#B9FFB9" class="modal-header">
+          <h4 id="header" class="modal-title"></h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- Modal body -->
+        <div id="body" class="modal-body">
+          Modal body..
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+{% if messages %}
+  {% for message in messages %}
+  {% if message.tags == 'warning'%}
+  <div class="alert alert-warning" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% elif message.tags == 'success'%}
+  <div class="alert alert-success" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {%endif%}
+  {% endfor %}
+{% endif %}
+<br>
+<canvas  id="myChart" width="100%" height="28px"></canvas>
+<script>
+var lbls = ['Solved 100%','Not Solved 100%'];
+// For drawing the lines
+var data1 = [{{solved}},{{notsolved}}];
+
+var ctx = document.getElementById("myChart");
+var myChart = new Chart(ctx, {
+  type: 'pie',
+  data: {
+    labels: lbls,
+    datasets: [
+      {
+  data: data1,
+  backgroundColor: ["#4BC0C0","#FF6384"],
+}
+    ]
+  }
+});
+</script>
+<hr><br>
+<center><h4>Students who have solved all questions</h4></center>
+	<div style="overflow-x: auto;">
+	<table class="table table-bordered">
+			<tr bgcolor="#f2f2f2">
+			<td><center>
+			<b>Sno.</b>
+			</center></td>
+			<td><center>
+			<b>Email</b>
+			</center></td>
+			<td><center>
+			<b>Percentage</b>
+			</center></td>
+			</tr>
+			{% for st,perc in students %}
+			<tr bgcolor="white">
+			<td><center>
+			{{forloop.counter}}
+			</center></td>
+			<td><center>
+			{{st}}
+			</center></td>
+			<td style="color:#00B10F"><center>
+			<b>{{perc}}</b>
+			</center></td>
+			<td><center><button style="white-space: nowrap;" id="{{st}}" onclick="func(this.id)" type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Answer Sheet</button></center></td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+		<br>
+</div>
+<script>
+function func(name){
+//var res = name.split(",");
+document.getElementById("header").innerHTML=name;
+document.getElementById("body").innerHTML = "<center><span class='spinner-border spinner-border-sm' style='width: 3rem; height: 3rem;vertical-align: middle;' role='status' aria-hidden='true'></span>&nbsp;&nbsp; Fetching answer sheet..</center>";
+
+$.ajax({
+url:'/courses/qn_attempts/-1/'+{{tid}}+'/'+name ,
+type:'get',
+success: function(response){
+
+$("#body").html("<br><table id='ansheet' style='white-space:normal' bgcolor='white' class='table table-bordered'></table>");
+
+
+$("#ansheet").html("<tr bgcolor='#f2f2f2'><td></td><td><center><b>Question</b></center></td><td><center><b>Answer</b></center></td></tr>")
+for (var i=0; i<response.quesns.length; i++) {
+if(response.imgurl[i]){
+	if(response.ans[i] == 1){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'></td><td style='color:#0CBD00'>+"+ response.posM[i] +"</td></tr>")
+	}
+	else if(response.ans[i] == 2){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'></td><td style='color:red'>-"+ response.negM[i] +"</td></tr>")
+	}
+	else{
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'></td><td style='color:grey'>NA</td></tr>")
+	}
+}
+else{
+	if(response.ans[i] == 1){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"</td><td style='color:#0CBD00'>+"+ response.posM[i] +"</td></tr>")
+	}
+	else if(response.ans[i] == 2){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"</td><td style='color:red'>-"+ response.negM[i] +"</td></tr>")
+	}
+	else{
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"</td><td style='color:grey'>NA</td></tr>")
+	}
+}
+
+
+}
+//$("#body").append("<center><a class='btn btn-primary' href='/courses/answersheet/"+res[1]+"' target='_blank'>Download PDF</a></center>");
+
+},
+error: function (textStatus, errorThrown) {
+alert('Error');
+}
+})
+
+}
+</script>
+{% endblock %}

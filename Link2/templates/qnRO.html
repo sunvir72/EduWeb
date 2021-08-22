@@ -1,0 +1,153 @@
+{% extends 'basepage.html' %}
+{% block content %}
+{% if user.is_authenticated %}
+<div style="padding-top:24px;background-color:white"><h2><center>Questionnaire: {{curr_q.name}}</center></h2><hr></div>
+<div class="container">
+<br>
+
+<h5><li>The time limit for this test is {{curr_q.time}} hrs</li>
+<li>Once you click on 'Start Test', the timer will start and you will go into full screen</li>
+<li style="color:red" >The test will get submitted automatically if you try to <b>escape full screen</b> or try to go into <b>inspect element</b></li></h5><br>
+<center><button class="btn btn-outline-warning" style="width:200px" onclick="openFullscreen();">Start Test</button></center><br>
+
+<div id="myid" style="display:none;background-color:white;overflow:auto;" class="container">
+<center><b><h4 id="clr" style="background-color:#00CD11 ;padding:15px;position:fixed;right:0;width:100%;"><span style="border-top-left-radius: 7px;border-bottom-left-radius: 7px;background-color:white;padding:2px">Time Left: </span><span style="border-top-right-radius: 7px;border-bottom-right-radius: 7px;background-color:white;padding:2px" id="demo"> </span></h4></b></center><br>
+
+<br><center><h3 style="background-color:#e9e9e9;padding:10px;border-radius: 8px;padding-top: 20px" >{{curr_q.name}}</h3></center>
+
+<form id='test' method="POST" onsubmit="event.preventDefault();funcT()" action="{% url 'qnRO' pk1 cr_crseid %}">
+{% csrf_token %}
+<table class="table table-transparent" style="background-color:white;white-space: normal;">
+{% for things in all_q %}
+<tr><td>
+<h4>Q{{forloop.counter}}) {{things.ques|linebreaksbr}}</h4>
+<h5>
+{% if things.isradio %}
+<input type="radio" name={{forloop.counter0}} value="a">  a) {{things.opt1}}</input><br>
+<input type="radio" name={{forloop.counter0}} value="b">  b) {{things.opt2}}</input><br>
+{% if things.opt3 %}<input type="radio" name={{forloop.counter0}} value="c">  c) {{things.opt3}}</input><br>{% endif %}
+{% if things.opt4 %}<input type="radio" name={{forloop.counter0}} value="d">  d) {{things.opt4}}</input><br>{% endif %}
+{% if things.opt5 %}<input type="radio" name={{forloop.counter0}} value="e">  e) {{things.opt5}}</input><br>{% endif %}
+{% if things.opt6 %}<input type="radio" name={{forloop.counter0}} value="f">  f) {{things.opt6}}</input><br>{% endif %}
+<button type="button" class="btn btn-dark btn-sm" onclick="uncheck({{forloop.counter0}})">Unmark</button><br>
+{% else %}
+<input type="checkbox" name={{forloop.counter0}}[] value="a">  a) {{things.opt1}}</input><br>
+<input type="checkbox" name={{forloop.counter0}}[] value="b">  b) {{things.opt2}}</input><br>
+{% if things.opt3 %}<input type="checkbox" name={{forloop.counter0}}[] value="c">  c) {{things.opt3}}</input><br>{% endif %}
+{% if things.opt4 %}<input type="checkbox" name={{forloop.counter0}}[] value="d">  d) {{things.opt4}}</input><br>{% endif %}
+{% if things.opt5 %}<input type="checkbox" name={{forloop.counter0}}[] value="e">  e) {{things.opt5}}</input><br>{% endif %}
+{% if things.opt6 %}<input type="checkbox" name={{forloop.counter0}}[] value="f">  f) {{things.opt6}}</input><br>{% endif %}
+{% endif %}
+</h5>
+
+</td></tr>
+{% endfor %}
+<input type="hidden" name="timeRemain" id="time">
+</table>
+<center><button id="subT" class="btn btn-primary" type="submit" style="width:250px">Sumbit</button></center>
+</form>
+
+</div>
+
+<script>
+function funcT(){
+document.getElementById("subT").innerHTML = "<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>&nbsp;&nbsp; Submitting Answers";
+document.getElementById('test').submit();
+}
+</script>
+<script>
+function uncheck(el) {
+ var ele = document.getElementsByName(el);
+   for(var i=0;i<ele.length;i++)
+      ele[i].checked = false;
+}
+</script>
+
+<script>
+var elem = document.getElementById("myid");
+
+function openFullscreen() {
+  elem.style.display = "block";
+    
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) { 
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { 
+    elem.msRequestFullscreen();
+  }
+  var flagr=0;
+  var flagy=0;
+  //var hh = '03:30';
+var hh="{{curr_q.time}}";
+
+// your input string
+var a1 = hh.split(':'); // split it at the colons
+
+// minutes are worth 60 seconds. Hours are worth 60 minutes.
+var seconds1 = (+a1[0])*60*60*1000 + (+a1[1])*60*1000 + 1000;
+
+var countDownDate = new Date().getTime()+seconds1;
+
+// Update the count down every 1 second
+var x = setInterval(function() {
+
+  // Get today's date and time
+  var now = new Date().getTime();
+    
+  // Find the distance between now and the count down date
+  var distance = countDownDate - now; //in ms
+
+  var seconds1=Math.floor(distance / 1000);
+  document.getElementById("time").value=seconds1;
+
+  // Time calculations for days, hours, minutes and seconds
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); //((distance) / (1000 * 60 * 60)) this would work. % was to counter days
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)); //(1000 * 60 * 60) so that minutes dont exceed 60min, 1000*60*60 is 60 min in ms
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    
+  // Output the result in an element with id="demo"
+  document.getElementById("demo").innerHTML =hours + "h "
+  + minutes + "m " + seconds + "s ";
+    
+  // If the count down is over, write some text 
+  if (distance < 0) {
+    clearInterval(x);
+    document.getElementById("demo").innerHTML = "EXPIRED";
+	document.getElementById('test').submit();
+  }
+  if ( flagy==0 && distance < 1200000) {
+    document.getElementById("clr").style.backgroundColor = "#F4D850";
+	flagy=1;
+  }
+  if (flagr==0 && distance < 300000 ) {
+    document.getElementById("clr").style.backgroundColor = "#F45050";
+	flagr=1;
+  }
+}, 200);
+  
+}
+</script>
+
+<script>
+
+// Events
+document.addEventListener("fullscreenchange", function() {
+
+if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+  elem.style.display = "none";
+  //location.replace("/courses")
+  document.getElementById('test').submit();
+    }
+    else{
+    }
+});
+
+</script>
+</div>
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,151 @@
+{% load static %}
+<html>
+<head>
+<link rel="shortcut icon" type="image/png" href="{% static 'img/hhh.png' %}" />
+<title>EduWeb</title>
+
+<style>
+
+body {
+margin:0;
+font-family: arial;
+}
+
+</style>
+<style>
+h1,h2,h3,h4,h5,h6,p {
+  font-family:Arial;
+}
+
+div {
+  word-wrap: break-word;
+}
+
+</style>
+ <style>
+table.hhh, td.hhh {
+  border: 0.5px solid #DBDBDB;
+  text-align: center;
+  padding-top:6px;
+  padding-left:10px;
+  padding-right:10px;
+  padding-bottom:6px; 
+  font-family: arial;
+  background-color: white;
+  font-size: 12px;
+  width: auto !important;
+}
+
+table.hhh {
+  border-collapse: collapse;
+  width: 100%;
+}
+th.hhh{
+  font-family: arial;
+  background-color: #EAEAEA;
+}
+table.hh, td.hh {
+  font-size: 8px;
+  font-family: arial;
+  background-color: white;
+  padding-bottom: 3px;
+}
+
+table.hh {
+  border-collapse: collapse;
+  
+}
+
+</style>
+ 
+</head>
+
+<body>
+	<!--
+	<hr><table class="hh">
+		<tr><td style="width:140px;border-right: 0.5px solid grey">Name: </td><td style="padding-left:30px" >{{qnrattepmt.name}}</td></tr>
+		<tr><td style="width:140px;border-right: 0.5px solid grey">Email: </td><td style="padding-left:30px" >{{qnrattepmt.email}}</td></tr>
+		<tr><td style="width:140px;border-right: 0.5px solid grey">Questionnaire: </td><td style="padding-left:30px" >{{qnrattepmt.qnr.name}}</td></tr>
+		<tr><td style="width:140px;border-right: 0.5px solid grey">Attempted on: </td><td style="padding-left:30px" >{{qnrattepmt.DT}}</td></tr>
+		<tr><td style="width:140px;border-right: 0.5px solid grey">Score: </td><td style="padding-left:30px" >{{qnrattepmt.score}}</td></tr>
+	</table>
+	<hr><br><br>
+-->
+<center><img src="{% static "img/gr_t.png" %}" width="163" height="35" align="middle"></center><hr>
+{% if isqnr %}
+<center><h1>{{qnrname}}</h1></center><hr><br>
+{% else %}
+<center><h1>{{topicname}} questions</h1></center><br>
+{% endif %}
+
+	{% for q in questions %}
+	<table class="hhh">
+			<tr class="hhh" >
+			<td style="width:30px;background-color:#f1f1f1" class="hhh">
+			Q{{forloop.counter}}</td>
+			<td style="text-align:left;background-color:#f1f1f1" class="hhh">{{q.ques}}
+				{% if q.img %}
+				<br>
+				<img src="/media/{{q.img}}" style="max-width:400px;max-height:400px">
+				{% endif %}
+			</td>
+		</tr></table>
+		<table class="hhh">
+		<tr>
+			<td class="hhh">
+			a) {{q.opt1}}
+			</td>
+			<td class="hhh">
+			b) {{q.opt2}}
+			</td>
+			<td class="hhh">
+			{% if q.opt3 %}c) {{q.opt3}}{% endif %}
+			</td>
+		</tr></table>
+		<table class="hhh"><tr>
+			<td class="hhh">
+			{% if q.opt4 %}d) {{q.opt4}}{% endif %}
+			</td>
+			<td class="hhh">
+			{% if q.opt5 %}e) {{q.opt5}}{% endif %}
+			</td>
+			<td class="hhh">
+			{% if q.opt6 %}f) {{q.opt6}}{% endif %}
+			</td>
+		</tr></table>
+		<table class="hhh"><tr>
+			<td class="hhh">
+			Correct: {{q.correct}}
+			</td>
+			<td class="hhh">
+			Marks: {{q.marks}}
+			</td>
+			<td class="hhh">
+			Negative: {{q.neg}}
+			</td>
+			<td class="hhh">
+			Topic: {{q.topic}}
+			</td>
+			<td class="hhh">
+				{% if q.level == 1 %}
+				Level: Easy
+				{% elif q.level == 2 %}
+				Level: Medium
+				{% else %}
+				Level: Difficult
+				{% endif %}
+			</td>
+		</tr></table>
+		<table class="hhh"><tr>
+			<td class="hhh">
+			Feedback: {{q.feedback}}
+			</td>
+			</tr></table>
+			<div>&nbsp;</div>
+			{% endfor %}
+		
+		<br>
+</div>
+
+</body>
+</html>

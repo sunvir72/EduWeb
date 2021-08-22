@@ -1,0 +1,117 @@
+{% extends 'basepage.html' %}
+  {% block content %}
+ <div style="background-color:white"><br><h2><center>Resource Accesses</center></h2><hr></div><br>
+<div class="container">
+    <div class="row">
+	<div class="col">
+	<div style="color:black;border: 1px solid #F39300;width: 49%;border-radius: 4px;padding:6px;display:inline-block"><center>Total Rows: {{rows}}</center></div>
+	<div style="color:black;border: 1px solid #F39300;width: 49%;border-radius: 4px;padding:6px;display:inline-block"><center>Total Columns: 7</center></div></div>
+	<div class="col">
+	<a  onclick="start()" style="width:100%;" class="btn btn-outline-success" href="{% url 'RaTdown' %}" >Download csv File</a>
+	<p id="st" style="color:grey">&nbsp;</p>
+	</div>
+	</div><br>
+
+	<script>
+	function start(){
+	  document.getElementById('st').innerHTML = "Download should begin shortly...";
+	}
+	</script>
+<canvas id="myChart" width="100%" height="35"></canvas>
+<br>
+<script>
+var lbls = ['link click sum','assignment click sum','questionnaire click sum'];
+// For drawing the lines
+var data1 = [{{link}},{{assignment}},{{questionnaire}}];
+
+var ctx = document.getElementById("myChart");
+var myChart = new Chart(ctx, {
+  type: 'pie',
+  data: {
+    labels: lbls,
+    datasets: [
+      {
+  data: data1,
+  backgroundColor: ["#00A4FF", "#FFE000","#2DF126"],
+}
+    ]
+  }
+});
+</script>
+<br><hr>
+<center><h5>Latest 10 rows of the dataset for visualization:</h5></center><br>
+	<table class="table table-bordered">
+			<tr bgcolor="#f2f2f2">
+			<td><center>
+			<b>Name</b>
+			</center></td>
+			<td><center>
+			<b>Email</b>
+			</center></td>
+			<td><center>
+			<b>Course</b>
+			</center></td>
+			<td><center>
+			<b>Topic</b>
+			</center></td>
+			<td><center>
+			<b>Resource Type</b>
+			</center></td>
+			<td><center>
+			<b>Date</b>
+			</center></td>
+			<td><center>
+			<b>Last Time</b>
+			</center></td>
+			<td><center>
+			<b>Click Sum</b>
+			</center></td>
+			</tr>
+			{% for r in ras %}
+			<tr bgcolor="white">
+			<td><center>
+			{{r.name}}
+			</center></td>
+			<td><center>
+			{{r.email}}
+			</center></td>
+			<td><center>
+			{{r.course}}
+			</center></td>
+			<td><center>
+			{{r.topic}}
+			</center></td>
+			<td><center>
+			{{r.rType}}
+			</center></td>
+			<td><center>
+			{{r.date}}
+			</center></td>
+			<td><center>
+			{{r.time}}
+			</center></td>
+			<td><center>
+			{{r.sum_click}}
+			</center></td>
+			</tr>
+			{% endfor %}
+		</table><br><hr><br>
+	<center><h5>Download the Ready CSV file by selecting the type of data to be Created for the Model:</h5></center><br>
+	<form action="{% url 'RaTdowntype' %}" method="post">
+    {% csrf_token %}
+	<table class="table table-borderless">
+		<tr>
+			<td style="padding-left:120px">
+				<input id="rtype" type="radio" name="data_" value="rtype" required/>Resource Wise Date<br>
+				<input id="date" type="radio" name="data_" value="date" required/>Day Wise Data<br>
+			</td>
+			<td>
+				<input type="submit" value="Download Model Ready Data">
+			</td>
+		</tr>
+	</table>
+	</form>	
+<br><br>
+
+</div>
+{% endblock %}

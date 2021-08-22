@@ -1,0 +1,23 @@
+{% extends 'basepage.html' %}
+{% block content %}
+{% if user.is_authenticated %}
+<div style="padding-top:24px;background-color:white"><h2><center>Questionnaire: {{thistest.name}}</center></h2><hr></div>
+<div class="container">
+<br>
+
+<h5><li>The time limit for this test is {{thistest.time}} hrs</li>
+<li>Once you click on 'Start Test' on the next page, the timer will start and you will go into full screen</li>
+<li><b>The test will get submitted automatically if you try to escape fullscreen or go outside the scope of this website</b></li>
+<li>Click the button below to move to the test page. Once you do that, all the security checks would be turned on</li>
+</h5><br>
+
+<form method="POST" action="{% url 'test' pk1 cid %}">
+  {% csrf_token %}
+  <center><button type="submit" class="btn btn-light" style="color:blue">I have read all the instructions</button></center>
+</form>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'basepage.html' %}
+  {% block content %}
+<div style="padding-top:24px;background-color:white"><h2><center>Student List</center></h2><hr></div><br>
+<div class="container">
+	{% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-success" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% endfor %}
+{% endif %}
+<center><h5>Enter Student Emails</h5> 
+<p style="color:grey">for multiple students press enter after each one (go to next line)</p>
+   <form id="add" action="{% url 'addstud' sidd %}"  method="POST">
+	{% csrf_token %}
+
+  <textarea class="form-control" id="content" name="message" rows="12"  style="width:55%;" required></textarea>
+  <br>
+  <button class="btn btn-primary" id="sub" type="submit" >Add Student(s) and Send Invite</button>
+
+</form>
+
+<script>
+$("textarea").keydown(function(e){
+if (e.keyCode == 32 )
+{
+    // prevent default behavior
+    e.preventDefault();
+}
+});
+</script>
+
+<script>
+  $("#add").submit(function(e) {
+e.preventDefault();
+
+
+var data=document.getElementById("content").value;
+//document.getElementById("txt").innerHTML=data;
+//temp=data.split(' ').join('');
+emails=data.split('\n')
+for(var i=0;i<emails.length;i++){
+if(emails[i] == ''){
+    alert('please romove new line');
+  return false;
+  }
+var atflag=0;
+var dotflag=0;
+for( var j=0;j<emails[i].length;j++){
+    if(emails[i][j] == '@'){
+    atflag=1;
+  }
+  
+  if(atflag && emails[i][j] == '.' ){
+    dotflag=1;
+  }
+}
+if(!atflag || !dotflag){
+ alert('Error! check emails. Exception occured in email number '+(i+1));
+ return false;
+}
+}
+//alert('good to go!');
+
+
+document.getElementById("sub").innerHTML = "<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>&nbsp;&nbsp; Processing";
+var serializedData=$("#add").serialize();
+$.ajax({
+url:$("#add").attr('action'),
+data:serializedData,
+type:'post',
+success: function(response){
+document.getElementById("sub").innerHTML = "Add Student(s) and Send Invite";
+if(response.result == 'ok')
+{alert('Email invite sent successfully');}
+else{
+  alert('Error! Email invite was not sent');
+}
+},
+error: function (textStatus, errorThrown) {
+  document.getElementById("sub").innerHTML = "<Add Student(s) and Send Invite";
+alert('Error');
+}
+})
+}); 
+</script>
+
+  <table id="tableNP" class="table table-bordered">
+			<tr bgcolor="#f2f2f2">
+			<td><center>
+			<b>STUDENTS</b>
+			</center></td>
+			<td><center>
+			<b>STATUS</b>
+			</center></td>
+			</tr>
+			{% for stud in sl %}
+			<tr id="studele" data-id="{{stud.id}}" bgcolor="white">
+			<td><center>
+			{{stud.email}}
+			</center></td>
+			<td><center>
+			{% if stud.stat %}
+				<p style="color:#38F25F">registered</p>
+			{% else %}
+			    <p style="color:red">unregistered</p>
+			{% endif %}
+			</center></td>
+			<td><center>
+			<a class="delclass" data-id="{{stud.id}}" style="color:red;cursor:pointer">remove</a>
+			</center></td>
+			</tr>
+			{% endfor %}
+		</table>
+<script>
+//var csrfToken=$("input[name=csrfmiddlewaretoken]").val();
+
+$("#tableNP").on('click','a.delclass',function(event) {
+event.stopPropagation();
+var dataId=$(this).data('id');
+
+$.ajax({
+//url:$("#delStud").attr('action'),
+url:'/courses/deleteStud/'+ dataId +'/'+ {{sidd}},
+
+dataType:'json',
+type:'get', //get also seems to be working
+success: function(){
+$('#studele[data-id="'+ dataId +'"]').remove();
+$('#studeleprint[data-id="'+ dataId +'"]').remove();
+}
+})
+});
+</script>
+</div>
+{% endblock %}

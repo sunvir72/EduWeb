@@ -1,0 +1,9 @@
+Ques 1: https://www.geeksforgeeks.org/check-if-a-key-is-present-in-every-segment-of-size-k-in-an-array/
+
+Ques 2: https://www.geeksforgeeks.org/program-find-minimum-maximum-element-array/
+
+Ques 3: https://www.geeksforgeeks.org/write-a-program-to-reverse-an-array-or-string/
+
+Ques 4: https://www.geeksforgeeks.org/c-program-to-sort-an-array-in-ascending-order/
+
+Ques 5: https://www.geeksforgeeks.org/kth-smallestlargest-element-unsorted-array/

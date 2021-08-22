@@ -1,0 +1,236 @@
+{% extends 'basepage.html' %}
+  {% block content %}
+<div style="background-color:white"><br><h2><center>Student attempts for Questionnaire: <b>{{curr_q.name}}</b></center></h2><hr></div><br>
+<div class="container">
+
+<!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div style="background-color:#B9FFB9" class="modal-header">
+          <h4 id="header" class="modal-title"></h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- Modal body -->
+        <div id="body" class="modal-body">
+          Modal body..
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+{% if messages %}
+  {% for message in messages %}
+  {% if message.tags == 'warning'%}
+  <div class="alert alert-warning" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% elif message.tags == 'success'%}
+  <div class="alert alert-success" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {%endif%}
+  {% endfor %}
+{% endif %}
+<br>
+<div class="row">
+<div class="col"><div style="padding-top:25px"></div>
+<canvas  id="myChart" width="100%" height="60%"></canvas></div>
+<div class="col"><center><p style="color:grey">Student scores</p></center>
+<canvas id="myChart1" width="100%" height="60%"></canvas></div>
+</div>
+<br>
+<script>
+var lbls = ['Not attempted','Attempted'];
+// For drawing the lines
+var data1 = [{{notyet|length}},{{regstuds|length}}-{{notyet|length}}];
+
+var ctx = document.getElementById("myChart");
+var myChart = new Chart(ctx, {
+  type: 'pie',
+  data: {
+    labels: lbls,
+    datasets: [
+      {
+  data: data1,
+  backgroundColor: ["#4BC0C0","#FF6384"],
+}
+    ]
+  }
+});
+</script>
+<script>
+var lbls = {{names|safe}};
+// For drawing the lines
+var data1 = {{scores}};
+var avg = [];
+for( i=0;i<data1.length;i++){
+avg.push({{mean}});
+}
+var ctx = document.getElementById("myChart1");
+var myChart1 = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: lbls,
+    datasets: [
+      {
+  data: data1,
+  backgroundColor: "#13AFA4",
+},
+{
+data:avg,
+backgroundColor: "transparent",
+type: 'line',
+fill: false,
+pointRadius: 0,
+
+borderColor: "#27DBF2",
+borderDash: [5, 5],
+backgroundColor: "#27DBF2",
+pointBackgroundColor: "#27DBF2",
+pointBorderColor: "#27DBF2",
+pointHoverBackgroundColor: "#27DBF2",
+pointHoverBorderColor: "transparent",
+pointHoverRadius:0
+}
+    ]
+  },
+  options: {
+ legend: {
+        display: false
+    },
+	scales: {
+        yAxes: [{
+            //display: true,
+            ticks: {
+                suggestedMin: 0,
+            }}],
+            xAxes: [{
+            display: false}]
+    },
+
+}
+});
+</script>
+<center><div style="border: 1px solid #F39300;width: 49%;border-radius: 4px;padding:6px;display:inline-block"><center><h5>Average Score: <b>{{mean}}</b></h5></center></div></center>
+	<br><hr><br>
+	<h4>Registered Students who have not attempted this questionnaire:</h4>
+	<table class="table table-bordered">
+	{% for st in notyet %}
+			<tr bgcolor="#f2f2f2">
+			<td>{{st.email}}</td>
+			</tr>
+	{% endfor %}
+	</table>
+	<div class="row">
+	<div  class="col"><a style="width:100%" id="em" onclick="showload()" class="btn btn-warning" href="{% url 'email' pk1 cid %}">Send Automated Email Reminder</a>&nbsp;&nbsp;&nbsp;&nbsp;</div>
+	<div  class="col"><a style="width:100%" class="btn btn-warning" href='mailto:{{sendmail}}?Subject=Reminder%20for%20Questionnaire&body=This%20is%20to%20remind%20that%20you%20have%20not%20yet%20attempted%20the%20{{curr_q.qtype}}%20questionnaire:%20{{curr_q.name}},%20for%20the%20course:%20{{curr_crse.item}}%0D%0A'>Send Custom Email Reminder</a></div>
+	</div><br>
+	<script>
+	function showload() {
+	document.getElementById("em").style.pointerEvents= "none";
+	document.getElementById("em").innerHTML = "<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>&nbsp;&nbsp; Sending Reminder";
+	}
+	</script>
+	<hr><br>
+	<center><h4>Registered Students Attempts <a href="{% url 'attemptscsv' pk1 %}" class="btn btn-success">Download csv</a></h4></center><br>
+	<div style="overflow-x: auto;">
+	<table class="table table-bordered">
+			<tr bgcolor="#f2f2f2">
+			<td><center>
+			<b>Sno.</b>
+			</center></td>
+			<td><center>
+			<b>Name</b>
+			</center></td>
+			<td><center>
+			<b>Email</b>
+			</center></td>
+			<td><center>
+			<b>Score</b>
+			</center></td>
+			<td><center>
+			<b>Attempted on</b>
+			</center></td>
+			</tr>
+			{% for st in attempts %}
+			<tr bgcolor="white">
+			<td><center>
+			{{forloop.counter}}
+			</center></td>
+			<td><center>
+			{{st.name}}
+			</center></td>
+			<td><center>
+			{{st.email}}
+			</center></td>
+			<td style="color:#00B10F "><center>
+			<b>{{st.score}}</b>
+			</center></td>
+			<td style="white-space: nowrap;"><center>
+			{{st.DT}}
+			</center></td>
+			<td><center><button style="white-space: nowrap;" id="{{st.name}},{{st.id}}" onclick="func(this.id)" type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Answer Sheet</button></center></td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+		<br>
+</div>
+<script>
+function func(name){
+var res = name.split(",");
+document.getElementById("header").innerHTML=res[0]+"'s Answer Sheet";
+document.getElementById("body").innerHTML = "<center><span class='spinner-border spinner-border-sm' style='width: 3rem; height: 3rem;vertical-align: middle;' role='status' aria-hidden='true'></span>&nbsp;&nbsp; Fetching answer sheet..</center>";
+
+$.ajax({
+url:'/courses/qn_attempts/'+res[1]+'/-1/-1' ,
+type:'get',
+success: function(response){
+
+$("#body").html("<br><table id='ansheet' style='white-space:normal' bgcolor='white' class='table table-bordered'></table>");
+
+
+$("#ansheet").html("<tr bgcolor='#f2f2f2'><td></td><td><center><b>Question</b></center></td><td><center><b>Answer</b></center></td></tr>")
+for (var i=0; i<response.quesns.length; i++) {
+if(response.imgurl[i]){
+	if(response.ans[i] == 1){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'></td><td style='color:#0CBD00'>+"+ response.posM[i] +"</td></tr>")
+	}
+	else if(response.ans[i] == 2){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'></td><td style='color:red'>-"+ response.negM[i] +"</td></tr>")
+	}
+	else{
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"<br><img src='"+response.imgurl[i]+"' style='max-width:400px;max-height:400px'></td><td style='color:grey'>NA</td></tr>")
+	}
+}
+else{
+	if(response.ans[i] == 1){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"</td><td style='color:#0CBD00'>+"+ response.posM[i] +"</td></tr>")
+	}
+	else if(response.ans[i] == 2){
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"</td><td style='color:red'>-"+ response.negM[i] +"</td></tr>")
+	}
+	else{
+	$("#ansheet").append("<tr><td>Q"+ (i+1) +"</td><td>"+ response.quesns[i] +"</td><td style='color:grey'>NA</td></tr>")
+	}
+}
+
+}
+$("#body").append("<center><a class='btn btn-primary' href='/courses/answersheet/"+res[1]+"' target='_blank'>Download PDF</a></center>");
+
+//$("#body").append(""+res[1]+"");
+
+},
+error: function (textStatus, errorThrown) {
+alert('Error');
+}
+})
+
+}
+</script>
+{% endblock %}

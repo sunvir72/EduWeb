@@ -1,0 +1,11 @@
+Q1: https://www.geeksforgeeks.org/given-an-array-arr-find-the-maximum-j-i-such-that-arrj-arri/
+
+Q2: https://www.geeksforgeeks.org/maximum-sum-path-across-two-arrays/
+
+Q3: https://www.geeksforgeeks.org/find-a-repeating-and-a-missing-number/
+
+Q4: https://www.geeksforgeeks.org/stock-buy-sell/
+
+Q5: https://www.geeksforgeeks.org/given-sorted-array-number-x-find-pair-array-whose-sum-closest-x/
+
+Q6: https://www.geeksforgeeks.org/chocolate-distribution-problem/

@@ -1,0 +1,13 @@
+Q1: https://www.geeksforgeeks.org/c-program-cyclically-rotate-array-one/
+
+Q2: https://www.geeksforgeeks.org/find-the-missing-number/
+ 
+Q3: https://www.geeksforgeeks.org/count-pairs-with-given-sum/
+
+Q4: https://www.geeksforgeeks.org/find-duplicates-in-on-time-and-constant-extra-space/
+
+Q5: https://www.geeksforgeeks.org/find-first-repeating-element-array-integers/
+
+Q6: https://www.geeksforgeeks.org/non-repeating-element/
+
+Q7: https://www.geeksforgeeks.org/find-the-largest-three-elements-in-an-array/

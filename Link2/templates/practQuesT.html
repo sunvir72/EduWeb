@@ -1,0 +1,364 @@
+{% extends 'basepage.html' %}
+{% block content %}
+{% if user.is_authenticated and user.profile.ifTeacher %}
+<div style="padding-top:24px;background-color:white"><h2><center>{{topic}} Practice Questionnaires</center></h2><hr></div><br>
+
+	<!-- The Modal -->
+  <div class="modal fade" id="bulk">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Bulk Upload</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <!-- Modal body -->
+        <div class="modal-body">
+<h4>Please note that the file must meet the following requirements:</h4>
+<ul>
+<li>The file must be a csv file</li>
+<li>Maximum 300 questions allowed per upload</li>
+<li>There must be <b>exactly 12</b> columns: 1 question, 6 options(2 are mandatory, rest can be left blank), 1 correct option, Points for correct answer, Negative Marks, Level(1=easy, 2=medium, 3=hard)) and Feedback</li>
+<li>Following is a small sample file: (All columns must be in <b>same order</b> as in the sample file, although names of headings(1st row) can be different)</li><br>
+</ul>
+<div style="overflow-x: auto;">
+<table bgcolor="white" class="table table-bordered">
+<tr>
+<td>Question</td>
+<td>option a</td>
+<td>option b</td>
+<td>option c</td>
+<td>option d</td>
+<td>option e</td>
+<td>option f</td>
+<td>Correct</td>
+<td>Points</td>
+<td>Negative</td>
+<td>Level</td>
+<td>Feedback</td>
+</tr>
+<tr>
+<td>question 1</td>
+<td>op1-a</td>
+<td>op1-b</td>
+<td>op1-c</td>
+<td>op1-d</td>
+<td></td>
+<td></td>
+<td>b</td>
+<td>4</td>
+<td>1</td>
+<td>2</td>
+<td>fb1</td>
+</tr>
+<tr>
+<td>question 2</td>
+<td>op2-a</td>
+<td>op2-b</td>
+<td>op2-c</td>
+<td>op2-d</td>
+<td>op2-e</td>
+<td>op2-f</td>
+<td>a,b</td>
+<td>4</td>
+<td>0</td>
+<td>1</td>
+<td>fb2</td>
+</tr>
+<tr>
+<td>question 3</td>
+<td>op3-a</td>
+<td>op3-b</td>
+<td>op3-c</td>
+<td>op3-d</td>
+<td>op3-e</td>
+<td></td>
+<td>c</td>
+<td>6</td>
+<td>2</td>
+<td>3</td>
+<td>fb3</td>
+</tr>
+</table>
+</div>
+<br>
+<center><form onsubmit="func1()" method="post" action="{% url 'bulkqn' -1 cid %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="text" name="topicname" value="{{topic}}" hidden>
+    <input type="file" name="file" accept=".csv" required>
+    <button id="uploading" class="btn btn-primary" type="submit" >Upload File</button>
+</form></center>
+<script>
+function func1(){
+document.getElementById("uploading").innerHTML = "<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>&nbsp;&nbsp; Uploading questions";
+}
+</script>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- The Modal -->
+  <div class="modal fade" id="editques">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Edit Question</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <!-- Modal body -->
+        <div class="modal-body">
+        	<form style="border:0.5px solid #007BFF;border-radius: 5px;padding: 5px;" id="updateform" action="#" method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
+				<textarea class="form-control" rows="5" cols="146" id="modalques" name="item" placeholder="Question" required></textarea><br>
+				<textarea class="form-control" rows="2" cols="146" id="modalfb" name="feedback" placeholder="feedback" ></textarea><br>
+				
+			<div style="margin-bottom: 20px" class="row">
+				<div style="min-width: 270px" class="col">
+					<input id="modalop1" class="form-control" placeholder="Option (a)" name="op1" required>
+				</div>
+				<div style="min-width: 270px" class="col">
+					<input id="modalop2" class="form-control" placeholder="Option (b)" name="op2" required>
+				</div>
+				<div style="min-width: 270px" class="col">
+					<input id="modalop3" class="form-control" placeholder="Option (c)" name="op3" >
+				</div>
+			</div>
+			<div style="margin-bottom: 20px" class="row">
+				<div style="min-width: 270px" class="col">
+					<input id="modalop4" class="form-control" placeholder="Option (d)" name="op4" >
+				</div>
+				<div style="min-width: 270px" class="col">
+					<input id="modalop5" class="form-control" placeholder="Option (e)" name="op5" >
+				</div>
+				<div style="min-width: 270px" class="col">
+					<input id="modalop6" class="form-control" placeholder="Option (f)" name="op6" >
+				</div>
+			</div>
+			<div style="margin-bottom: 20px" class="row">
+				<div class="col">
+					Points<input id="modalpoints" class="form-control" style="width: 200px" type="number" min="1" max="100" step=".5" name="marks" value=1 required>
+				</div>
+				<div class="col">
+					Negative marks<input id="modalneg" class="form-control" style="width: 200px" type="number" min="0" max="100" step=".5" name="neg" value=0 required>
+				</div>
+				<div class="col">
+						Level
+						<div style="width: 200px" class="form-row align-items-center"><div class="col">
+					      <select id="modallevel" class="custom-select mr-sm-2" name = "level" required>
+					 	  <option value="1">Easy</option>
+						  <option value="2">Medium</option>
+						  <option value="3">Difficult</option>
+					      </select>
+					    </div></div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col">
+					Select the correct Option(s)
+					<div class="form-row align-items-center"><div class="col">
+				      <select id="modalcorrect" style="width:150px" multiple="multiple" class="custom-select mr-sm-2" name = "correct[]" required>
+				      <!--<option value="">None</option>-->
+				 	  <option value="a" >a</option>
+					  <option value="b" >b</option>
+					  <option value="c" >c</option>
+				      <option value="d" >d</option>
+				      <option value="e" >e</option>
+				      <option value="f" >f</option>
+				      </select>
+				    </div></div>
+				</div>
+				<div class="col">
+						Topic
+						<input type="text" class="form-control" value="{{topic}}" style="width: 200px" disabled>
+						<input type="text" class="form-control" value="{{topic}}" name="topic_" style="width: 200px" hidden>
+				</div>
+				<div class="col">
+					Image<br>
+					<input type="radio" name="sameimage" value="same" onclick='document.getElementById("newimage").disabled=true' checked required>  same image</input><br>
+					<input type="radio" name="sameimage" value="different" onclick='document.getElementById("newimage").disabled=false' required>  different image</input>
+					<p style="color:grey;font-size:12.5px">(If you wish to remove the image, select 'different image' and do not choose any file)</p>
+					<input id="newimage" type="file" name="img" accept=".jpg,.jpeg,.png" style="border:1px solid #D1D0D0;border-radius:3px;background-color: white" disabled>
+				</div>
+			</div>
+			<center><input type="submit" value="Update"></center>
+			</form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="container">
+{% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-success" role="alert">
+    <center>{{ message }}</center>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<button class="btn btn-outline-dark btn-block" data-toggle="modal" data-target="#bulk">Bulk Upload</button><br>
+<h4>Add New Question:</h4>
+<form style="border:0.5px solid #007BFF;border-radius: 5px;padding: 5px;" action="{% url 'qn' -1 cid %}" method="POST" enctype="multipart/form-data">
+	{% csrf_token %}
+	<textarea class="form-control" rows="5" cols="146" id="Enter Question" name="item" placeholder="Question" required></textarea><br>
+	<textarea class="form-control" rows="2" cols="146" id="Enter Question" name="feedback" placeholder="feedback" ></textarea><br>
+<div style="margin-bottom: 20px" class="row">
+	<div style="min-width: 270px" class="col">
+		<input class="form-control" placeholder="Option (a)" name="op1" required>
+	</div>
+	<div style="min-width: 270px" class="col">
+		<input class="form-control" placeholder="Option (b)" name="op2" required>
+	</div>
+	<div style="min-width: 270px" class="col">
+		<input class="form-control" placeholder="Option (c)" name="op3" >
+	</div>
+</div>
+<div style="margin-bottom: 20px" class="row">
+	<div style="min-width: 270px" class="col">
+		<input class="form-control" placeholder="Option (d)" name="op4" >
+	</div>
+	<div style="min-width: 270px" class="col">
+		<input class="form-control" placeholder="Option (e)" name="op5" >
+	</div>
+	<div style="min-width: 270px" class="col">
+		<input class="form-control" placeholder="Option (f)" name="op6" >
+	</div>
+</div>
+<div style="margin-bottom: 20px" class="row">
+	<div class="col">
+		Points<input class="form-control" style="width: 200px" type="number" min="1" max="100" step=".5" name="marks" value=1 required>
+	</div>
+	<div class="col">
+		Negative marks<input class="form-control" style="width: 200px" type="number" min="0" max="100" step=".5" name="neg" value=0 required>
+	</div>
+	<div class="col">
+			Level
+			<div style="width: 200px" class="form-row align-items-center"><div class="col">
+		      <select class="custom-select mr-sm-2" name = "level" required>
+		 	  <option value="1">Easy</option>
+			  <option value="2">Medium</option>
+			  <option value="3">Difficult</option>
+		      </select>
+		    </div></div>
+	</div>
+</div>
+<div class="row">
+	<div class="col">
+		Select the correct Option(s)
+		<div class="form-row align-items-center"><div class="col">
+	      <select style="width:150px" multiple="multiple" class="custom-select mr-sm-2" name = "correct[]" required>
+	      <!--<option value="">None</option>-->
+	 	  <option id="a" value="a" >a</option>
+		  <option id="b" value="b" >b</option>
+		  <option id="c" value="c" >c</option>
+	      <option id="d" value="d" >d</option>
+	      <option id="e" value="e" >e</option>
+	      <option id="f" value="f" >f</option>
+	      </select>
+	    </div></div>
+	</div>
+	<div class="col">
+			Topic
+			<input type="text" class="form-control" value="{{topic}}" style="width: 200px" disabled>
+			<input type="text" class="form-control" value="{{topic}}" name="topic_" style="width: 200px" hidden>
+	</div>
+<div class="col">
+		Image<br>
+		<input type="file" name="img" accept=".jpg,.jpeg,.png" style="border:1px solid #D1D0D0;border-radius:3px;background-color: white">
+	</div>
+</div>
+<center><input type="submit" value="Add Question"></center>
+</form>
+<br>
+<div style="overflow-x:auto">
+<table class="table table-transparent" style="background-color:white;white-space:normal">
+	{% for things in all_q %}
+	<tr><td>
+	<h5>Q{{forloop.counter}}) {{things.ques|linebreaksbr}} <button class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#editques" onclick='updatemodal("{{things.id}}","{{things.ques}}","{{things.opt1}}","{{things.opt2}}","{{things.opt3}}","{{things.opt4}}","{{things.opt5}}","{{things.opt6}}","{{things.correct}}","{{things.marks}}","{{things.neg}}","{{things.level}}","{{things.feedback}}")'> Edit</button></h5>
+	{% if things.img %}<br>
+	<img src="{{things.img.url}}" style="max-width:400px;max-height:400px"><br><br>
+	{% endif %}
+	<h6>
+	{% if things.opt1 %}<li>a) {{things.opt1}}</li>{% endif %}
+	{% if things.opt2 %}<li>b) {{things.opt2}}</li>{% endif %}
+	{% if things.opt3 %}<li>c) {{things.opt3}}</li>{% endif %}
+	{% if things.opt4 %}<li>d) {{things.opt4}}</li>{% endif %}
+	{% if things.opt5 %}<li>e) {{things.opt5}}</li>{% endif %}
+	{% if things.opt6 %}<li>f) {{things.opt6}}</li>{% endif %}
+	<br>
+	<p style="color:#FFB100;display:inline-block">CORRECT: <b>{{things.correct}} </b> </p> |
+	<p style="color:#0CBD00;display:inline-block">POINTS: <b>{{things.marks}}</b> </p> |
+	<p style="color:red;display:inline-block">NEGATIVE MARKS: <b>{{things.neg}}</b> </p> |
+	{% if things.level == 1 %}
+	<p style="color:grey;display:inline-block"> LEVEL: <b>easy</b> </p> |
+	{% elif things.level == 2 %}
+	<p style="color:grey;display:inline-block"> LEVEL: <b>medium</b> </p> |
+	{% else %}
+	<p style="color:grey;display:inline-block"> LEVEL: <b>hard</b> </p> |
+	{% endif %}
+	<p style="color:grey;display:inline-block"> TOPIC:<b>{{things.topic}}</b> </p>
+	{% if things.istest == 1 %}|
+	<p style="background-color:#F5B041;border-color:white;display:inline-block;vertical-align: text-top;" class="btn btn-sm btn-primary"> Test </p>
+	{% endif %}
+	{% if things.feedback %}<br>
+	Feedback: {{things.feedback}}
+	{% endif %}
+	</td>
+	<td><h5><a class="btn btn-outline-danger btn-sm" href="{% url 'delqn' things.id -1 cid %}">Delete</a></h5>
+	</h6></td></tr>
+	{% endfor %}
+</table>
+</div>
+</div>
+<script>
+function endisopt(opt){
+if(document.getElementById(opt+'_').value=="") { 
+            document.getElementById(opt).disabled = true; 
+        }
+else { 
+            document.getElementById(opt).disabled = false;
+     }
+}
+</script>
+
+<script>
+	function updatemodal(id,ques,op1,op2,op3,op4,op5,op6,correct,marks,neg,level,fb){
+		//alert(id+" "+ques+" "+op1+" "+op2+" "+op3+" "+op4+" "+op5+" "+op6+" "+correct+" "+marks+" "+neg+" "+level+" "+topic+" "+fb);
+		document.getElementById("modalques").value=ques;
+		document.getElementById("modalfb").value=fb;
+		document.getElementById("modalop1").value=op1;
+		document.getElementById("modalop2").value=op2;
+		document.getElementById("modalop3").value=op3;
+		document.getElementById("modalop4").value=op4;
+		document.getElementById("modalop5").value=op5;
+		document.getElementById("modalop6").value=op6;
+		document.getElementById("modalpoints").value=marks;
+		document.getElementById("modalneg").value=neg;
+		document.getElementById("modallevel").value=level;
+		var corr_opts = correct.split(",");
+		$("#modalcorrect").val(corr_opts);
+		document.getElementById("updateform").action="/courses/updateqn/"+id+"/-1/{{cid}}";
+	}
+</script>
+
+<script>
+	//multiple selectbox select through this code. dont learn. can be done by pressing shift
+$('option').mousedown(function(e) {
+    e.preventDefault();
+    var originalScrollTop = $(this).parent().scrollTop();
+    console.log(originalScrollTop);
+    $(this).prop('selected', $(this).prop('selected') ? false : true);
+    var self = this;
+    $(this).parent().focus();
+    setTimeout(function() {
+        $(self).parent().scrollTop(originalScrollTop);
+    }, 0);
+    
+    return false;
+});
+</script>
+{% endif %}
+
+{% endblock %}
